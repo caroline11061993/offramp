@@ -1,0 +1,54 @@
+---
+title: "How the FIRE Number Calculator works"
+description: "A walkthrough of the exact logic behind the FIRE Number Calculator — the quick target formula, the debt projection, and the real, simulation-backed verdict underneath it."
+publishedAt: "2026-08-05"
+relatedCalculator: "fire-number-calculator"
+dek: "The headline number is a one-line formula. The verdict underneath it is a real projection. Here's what each one is actually doing, and why they can disagree."
+---
+
+## Two answers, not one
+
+The [FIRE Number Calculator](/fire-number-calculator) gives you two different things on the same page, and they're not the same calculation:
+
+- A **quick target** — a classic withdrawal-rate rule of thumb, computed instantly from a one-line formula.
+- A **real verdict** — a year-by-year projection that actually walks your savings forward, applies pension locking, and checks whether the money lasts to your life expectancy.
+
+The quick target is useful for a gut-check. The verdict is the one worth trusting, because it's the only one that can actually tell you "yes, but only if you save more" or "no, even with a lump sum" — the quick target can't say either of those things, it just gives you a target size.
+
+## Everything here is in today's money
+
+Unlike the FIRE Age Calculator, this engine doesn't model inflation at all — no nominal/real conversion, no fiscal drag. Every number you enter and every number you see is already in today's pounds, growing at a **real** rate (the growth rate you enter is "above inflation"). That's what makes it fast: a much simpler model, in exchange for less precision than the full year-by-year FIRE Age simulation.
+
+## The quick target formula
+
+```
+Quick Target = (annual spending ÷ withdrawal rate) + debt at retirement
+```
+
+The withdrawal rate is the share of your portfolio you'd plan to draw each year — 3.5% is the default here, deliberately more conservative than the commonly-cited 4% rule, because a FIRE retirement usually needs to last well longer than the ~30 years the original 4% research assumed. There's a hint under the withdrawal-rate field that adjusts based on how long your actual horizon (life expectancy minus retirement age) is, compared to that 30-year assumption.
+
+## Your debt is calculated forward, not just typed in
+
+You don't enter what your mortgage will be at retirement — you enter what it is **today**, and the calculator projects it forward itself, using the same monthly amortization math (interest and principal split every month) as the FIRE Age Calculator. That projected balance is what gets added into the Quick Target formula above, and it's also what the "real verdict" projection clears at retirement — either as a single lump sum, or spread out as an ongoing repayment through retirement, depending on which you choose.
+
+This is also why the Property section further down the page is separate from debt: debt is already fully accounted for in every number above it. Property is a different question entirely — see below.
+
+## How the real verdict is built
+
+This is where the calculator stops being a formula and starts being a simulation, just a simpler one than FIRE Age:
+
+1. Starting from today's liquid assets (cash + ISA + GIA) and pension, held separately.
+2. Every month between now and your retirement age, your chosen monthly saving is added to the liquid pot, and both pots compound at your growth rate.
+3. At retirement, any lump-sum debt is cleared from the liquid pot in one step (you'll see this as a visible dip on the chart right at your retirement age).
+4. From retirement onward, each year's spending (plus any gradual debt repayment) is drawn from liquid assets first, and only from pension once you've reached the UK pension access age (57) — exactly the same locking rule as the FIRE Age Calculator.
+5. The projection runs all the way to your life expectancy. If it runs dry before then, that's a real depletion age, not just a warning.
+
+The **monthly saving needed** figure is the amount that makes step 2–5 work out to exactly zero left over at your life expectancy — solved directly, not guessed at.
+
+## Why the two numbers can disagree
+
+Because the quick target is a single static number and the verdict is a full projection with pension locking, they can point to different conclusions on the same inputs. The most common case: a healthy total net worth that still produces a "short" verdict, because too much of it sits in a pension that isn't accessible until 57 and your target retirement age is younger than that — the liquid side alone has to carry the years in between, and the quick target formula has no way to know that.
+
+## The property comparison is optional, and separate from your target
+
+If you own property, switching it on adds a dedicated card and a toggle on the chart: "include selling property." With it off, the chart shows your plan as if the house is never touched. With it on, the property's projected value at retirement is added to your liquid pot at that point, as if you sold it — and you'll see the monthly saving required drop accordingly. Both the with-and-without numbers are always shown side by side further down the page, regardless of which one the chart toggle is set to, so you can see exactly how much the house is doing for your plan without committing to selling it.

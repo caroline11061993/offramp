@@ -1,26 +1,134 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens ported from the validated prototype (uk_fire_calculator.html).
+ * Warm-paper editorial palette — deliberately not a fintech dashboard, no dark mode
+ * in the source, so none is added here.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #faf9f5;
+  --card: #ffffff;
+  --card-2: #f4f1ea;
+
+  --ink: #141413;
+  --text-muted: #6b6862;
+  --text-faint: #9c988e;
+
+  --line: #e8e6dc;
+  --line-strong: #d9d6c9;
+
+  --accent: #d97757;
+  --accent-dim: #c9633f;
+  --accent-soft: #f3e2da;
+
+  --blue: #6a9bcc;
+  --blue-dim: #4f80b3;
+
+  --green: #788c5d;
+
+  --warn: #c1594a;
+  --warn-soft: #f8e6e2;
+
+  --radius: 14px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-card-2: var(--card-2);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-ink: var(--ink);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-blue: var(--blue);
+  --color-blue-dim: var(--blue-dim);
+
+  --color-green: var(--green);
+
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  --radius-token: var(--radius);
+
+  --font-heading: var(--font-poppins);
+  --font-body: var(--font-lora);
+  --font-data: var(--font-ibm-plex-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-lora), Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 600;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+/* Guide article body (MDX-rendered) — hand-rolled instead of a typography plugin,
+ * scoped to this one class so it never leaks into calculator UI. */
+.prose-guide {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 15.5px;
+  line-height: 1.75;
+  color: var(--ink);
+}
+.prose-guide h2 {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  margin: 2em 0 0.6em;
+}
+.prose-guide h3 {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  margin: 1.75em 0 0.5em;
+}
+.prose-guide p {
+  margin: 0 0 1.1em;
+}
+.prose-guide ul,
+.prose-guide ol {
+  margin: 0 0 1.1em;
+  padding-left: 1.4em;
+}
+.prose-guide li {
+  margin-bottom: 0.4em;
+}
+.prose-guide a {
+  color: var(--accent-dim);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-guide strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.prose-guide blockquote {
+  border-left: 3px solid var(--accent-dim);
+  background: var(--card-2);
+  padding: 0.9em 1.1em;
+  border-radius: 10px;
+  margin: 0 0 1.1em;
+  font-style: italic;
+  color: var(--text-muted);
 }

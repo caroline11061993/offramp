@@ -1,0 +1,70 @@
+---
+title: "How the FIRE Age Calculator works"
+description: "A walkthrough of the exact logic behind the FIRE Age Calculator — nominal-vs-real handling, the decumulation order, pension locking, and how the FIRE age itself gets found."
+publishedAt: "2026-08-01"
+relatedCalculator: "fire-age-calculator"
+dek: "Every number on the results page comes from a specific rule, not a vibe. Here's what actually happens between hitting \"See my plan\" and getting an age back."
+---
+
+## What it's actually doing
+
+The [FIRE Age Calculator](/fire-age-calculator) doesn't apply a formula and solve for an answer — it runs a full year-by-year simulation of your finances, one year at a time, from your current age to your life expectancy. Then it repeats that simulation for every possible retirement age from next year onward, and reports the **earliest** one where the simulation makes it all the way to your life expectancy without running out of money.
+
+That's the whole method: brute-force testing, not algebra. It's slower than a formula, but it's the only way to correctly capture things that change year to year — tax bands, a mortgage that eventually gets paid off, care costs that kick in later, a State Pension that starts at a fixed age.
+
+## Nominal internally, real on screen
+
+This is the part most calculators skip, and it's worth understanding because it explains some numbers that would otherwise look odd.
+
+Every figure you type in — salary, spending, balances — is in **today's money**. But the simulation itself runs in **nominal, inflated pounds** internally, and only converts back to today's money at the point of display. Two things force this:
+
+- **UK tax bands are frozen in nominal terms.** The personal allowance and rate thresholds don't rise with inflation, so if your salary just keeps pace with inflation, you drift into higher tax bands over time — a real effect called fiscal drag. Simulating in today's money would hide this entirely.
+- **A mortgage payment is a fixed nominal amount.** £1,800/month agreed today doesn't become £1,900/month next year just because prices rose — the pound amount is fixed until the loan is repaid or refinanced. Simulating in real terms would make it silently shrink in a way your actual mortgage never does.
+
+So each simulated year, your salary, spending, and account balances are grown forward by inflation before anything else happens, tax and mortgage logic runs on those inflated figures, and only then is the result divided back down by the same inflation factor before it's shown to you. You never see a nominal number — but the maths underneath needed them.
+
+## Two conventions for growth rates, on purpose
+
+You'll notice the calculator asks for growth rates in two different ways, and that's deliberate rather than inconsistent:
+
+- **Cash return and property appreciation** are entered as **real** rates ("above inflation") — inflation is added back in automatically.
+- **ISA/GIA growth and pension growth** are entered as **nominal** rates ("before inflation") — used as-is, because that's what the fiscal-drag maths above actually needs.
+
+Both conventions are labelled on the field itself, so you don't need to remember which is which — just enter what the label asks for.
+
+One more detail: ISA/GIA/pension growth uses a **single rate for both the working years and retirement**. Some calculators quietly de-risk your portfolio the moment you retire, applying a lower assumed return. This one doesn't — if you want to model a more conservative retirement allocation, that's a deliberate choice you'd make by lowering the rate yourself, not something baked in silently.
+
+## Where your money actually goes, in order
+
+Every working year, in this order:
+
+1. **Take-home pay** is computed from your gross salary using real UK income tax and National Insurance bands (including the personal allowance taper above £100,000) — not a flat estimate.
+2. **Pension contributions** (yours + employer) are added first.
+3. Whatever's left after spending and any mortgage payment is your **surplus** for the year, and it lands in cash.
+4. A **cash buffer sweep** runs every year, working or retired: if your cash balance is above a set buffer, the excess flows into your ISA (up to the annual allowance) and then your GIA — because ISA growth is never taxed, so it's prioritised.
+
+## Drawing it back down in retirement
+
+Once you're retired, spending each year is drawn from your accounts in a fixed order — cheapest tax consequence first:
+
+1. **Cash**
+2. **GIA**
+3. **ISA**
+4. **Pension** — but only once you've reached your pension access age
+5. **Property** — only if you've told the explorer to include it as a last-resort backstop, and only once everything else is exhausted
+
+## Pension locking is a hard rule, not a caveat
+
+Your pension balance counts toward your net worth from day one, but the simulation will not draw a single pound from it before your chosen access age (57 by default — the UK's earliest normal private-pension access age from 2028). If your other accounts run dry before then, the plan is marked as **not surviving**, even if the pension itself is large. This is the single most common reason a plan that "looks fine" on total net worth turns out not to work at the retirement age you had in mind — try retiring a year or two before your access age on the slider and watch how thin the liquid-assets line gets before the pension line ever moves.
+
+## Property and mortgage, tracked apart from everything else
+
+Your property appreciates in the background at its own rate, and your mortgage amortizes **monthly** — not as one lump annual deduction — using the same interest/principal split a real repayment mortgage uses. Property is never sold automatically. The explorer shows two lines specifically so you can see the difference: your liquid position on its own, and what the picture looks like if you were willing to sell the house as a last resort.
+
+## State Pension
+
+If you switch it on, your State Pension amount is added as income from your State Pension age onward, directly reducing how much your own portfolio needs to cover that year. It doesn't affect anything before that age.
+
+## Finding the age itself
+
+With all of the above defined, `findFireAge` just tries every retirement age from `current age + 1` up to `current age + 55` (capped at your life expectancy), running the full simulation for each one, and returns the first one that survives all the way to your life expectancy. The explorer slider lets you re-run that same simulation manually for any other age, so you can see exactly what changes a year earlier or later.

@@ -1,69 +1,77 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getAllGuides } from "@/lib/mdx/guides";
 
 export default function Home() {
+  const guides = getAllGuides().slice(0, 3);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="mx-auto max-w-[1040px] px-5 pb-20 pt-14">
+      <header className="mb-12 max-w-[62ch]">
+        <h1 className="font-heading text-[clamp(34px,6vw,52px)] font-bold leading-[1.08] text-ink">
+          Find your <em className="not-italic text-accent">offramp</em>.
+        </h1>
+        <p className="mt-4 font-body text-[17px] italic text-accent-dim">
+          When does work become optional? How big does the number actually need to be?
+        </p>
+        <p className="mt-3 font-body text-[14.5px] text-text-muted">
+          Use the FIRE Age Calculator to find out when work becomes optional — a full year-by-year
+          simulation showing when you can stop working for money once you reach financial
+          independence. Use the FIRE Number Calculator to find out how big that number needs to be.
+        </p>
+      </header>
+
+      <div className="mb-14 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Link
+          href="/fire-age-calculator"
+          className="block rounded-[var(--radius-token)] border border-line-strong bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent-dim hover:shadow-md"
+        >
+          <div className="font-data text-[10px] uppercase tracking-wide text-text-faint">Calculator 01</div>
+          <h2 className="mt-1 font-heading text-[19px] font-semibold text-ink">FIRE Age Calculator</h2>
+          <p className="mt-2 text-[13.5px] text-text-muted">
+            A full year-by-year simulation showing exactly when work could become optional.
           </p>
+          <div className="mt-3 font-heading text-[12.5px] font-semibold text-accent-dim">Start →</div>
+        </Link>
+        <Link
+          href="/fire-number-calculator"
+          className="block rounded-[var(--radius-token)] border border-line-strong bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent-dim hover:shadow-md"
+        >
+          <div className="font-data text-[10px] uppercase tracking-wide text-text-faint">Calculator 02</div>
+          <h2 className="mt-1 font-heading text-[19px] font-semibold text-ink">FIRE Number Calculator</h2>
+          <p className="mt-2 text-[13.5px] text-text-muted">
+            A quicker rule-of-thumb target, plus a real, life-expectancy-aware verdict.
+          </p>
+          <div className="mt-3 font-heading text-[12.5px] font-semibold text-accent-dim">Start →</div>
+        </Link>
+      </div>
+
+      {guides.length > 0 ? (
+        <div className="mb-14">
+          <div className="mb-4 flex items-baseline justify-between">
+            <h2 className="font-heading text-[18px] font-semibold text-ink">From the guides</h2>
+            <Link href="/guides" className="font-heading text-[12.5px] font-semibold text-accent-dim">
+              All guides →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {guides.map((guide) => (
+              <Link
+                key={guide.slug}
+                href={`/guides/${guide.slug}`}
+                className="block rounded-[var(--radius-token)] border border-line bg-card p-4 shadow-sm hover:border-accent-dim"
+              >
+                <h3 className="font-heading text-[14px] font-semibold text-ink">{guide.frontmatter.title}</h3>
+                <p className="mt-1.5 text-[12.5px] text-text-muted">{guide.frontmatter.description}</p>
+              </Link>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      ) : null}
+
+      <div className="rounded-[var(--radius-token)] border border-line bg-card-2 p-5 text-[13px] text-text-muted">
+        Calculations run entirely in your browser — nothing you enter is saved or sent anywhere. Your
+        scenario is encoded into the page URL, so you can bookmark or share it if you want to.
+      </div>
+    </main>
   );
 }
