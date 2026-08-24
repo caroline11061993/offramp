@@ -132,3 +132,33 @@ h3 {
   font-style: italic;
   color: var(--text-muted);
 }
+.prose-guide table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.1em;
+  font-size: 0.9em;
+}
+.prose-guide th,
+.prose-guide td {
+  padding: 0.55em 0.75em;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+.prose-guide th {
+  background: var(--card-2);
+  color: var(--text-muted);
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+.prose-guide tr:nth-child(even) td {
+  background: var(--card-2);
+}
+.prose-guide code {
+  background: var(--card-2);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 0.9em;
+}

@@ -1,9 +1,14 @@
 import { ImageResponse } from "next/og";
+import { getResourceArticleBySlug } from "@/lib/mdx/resources";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default async function Image() {
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const article = getResourceArticleBySlug(slug);
+  const title = article?.frontmatter.title ?? "Must Read";
+
   return new ImageResponse(
     (
       <div
@@ -21,9 +26,8 @@ export default async function Image() {
         <div style={{ display: "flex", fontSize: 22, color: "#c9633f", letterSpacing: 2 }}>
           OFFRAMP · MUST READ
         </div>
-        <div style={{ display: "flex", fontSize: 72, fontWeight: 700, marginTop: 24 }}>Must Read</div>
-        <div style={{ display: "flex", fontSize: 28, color: "#6b6862", marginTop: 24, maxWidth: 820 }}>
-          UK tax wrappers, pension mechanics, and investment platforms.
+        <div style={{ display: "flex", fontSize: 60, fontWeight: 700, marginTop: 24, maxWidth: 980 }}>
+          {title}
         </div>
       </div>
     ),

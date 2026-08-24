@@ -9,7 +9,7 @@ export const siteConfig = {
     { label: "FIRE Age Calculator", href: "/fire-age-calculator" },
     { label: "FIRE Number Calculator", href: "/fire-number-calculator" },
     { label: "Guides", href: "/guides" },
-    { label: "Resources", href: "/resources" },
+    { label: "Must Read", href: "/resources" },
     { label: "About", href: "/about" },
   ],
 } as const;

@@ -1,27 +1,29 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { GuideFrontmatter } from "@/lib/mdx/guides";
+import type { ArticleFrontmatter } from "@/lib/mdx/content";
 import { RecommendationModule } from "@/components/monetization/RecommendationModule";
 import { getRecommendationsForCategory, type RecommendationCategory } from "@/config/recommendations.config";
 
-const CALCULATOR_LABELS: Record<GuideFrontmatter["relatedCalculator"], string> = {
+const CALCULATOR_LABELS: Record<ArticleFrontmatter["relatedCalculator"], string> = {
   "fire-age-calculator": "FIRE Age Calculator",
   "fire-number-calculator": "FIRE Number Calculator",
 };
 
 const CALCULATOR_RECOMMENDATION_SIGNAL: Record<
-  GuideFrontmatter["relatedCalculator"],
+  ArticleFrontmatter["relatedCalculator"],
   { forCategory: RecommendationCategory }
 > = {
   "fire-age-calculator": { forCategory: "diversification" },
   "fire-number-calculator": { forCategory: "platform-comparison" },
 };
 
-export function GuideLayout({
+export function ArticleLayout({
   frontmatter,
+  eyebrow = "Guide",
   children,
 }: {
-  frontmatter: GuideFrontmatter;
+  frontmatter: ArticleFrontmatter;
+  eyebrow?: string;
   children: ReactNode;
 }) {
   const calculatorHref = `/${frontmatter.relatedCalculator}`;
@@ -31,7 +33,7 @@ export function GuideLayout({
   return (
     <article className="mx-auto max-w-[720px] px-5 pb-20 pt-10">
       <div className="mb-2 font-data text-xs font-semibold uppercase tracking-wide text-accent-dim">
-        Guide
+        {eyebrow}
       </div>
       <h1 className="font-heading text-[clamp(28px,5vw,38px)] font-bold leading-tight text-ink">
         {frontmatter.title}

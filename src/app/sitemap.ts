@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllGuides } from "@/lib/mdx/guides";
+import { getAllResourceArticles } from "@/lib/mdx/resources";
 import { siteConfig } from "@/config/site.config";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -19,5 +20,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...guideRoutes];
+  const resourceRoutes: MetadataRoute.Sitemap = getAllResourceArticles().map((article) => ({
+    url: `${siteConfig.url}/resources/${article.slug}`,
+    lastModified: article.frontmatter.updatedAt ?? article.frontmatter.publishedAt,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
+  return [...staticRoutes, ...guideRoutes, ...resourceRoutes];
 }

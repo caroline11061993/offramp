@@ -2,13 +2,13 @@ import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import type { Metadata } from "next";
-import { getAllGuides, getGuideBySlug } from "@/lib/mdx/guides";
+import { getAllResourceArticles, getResourceArticleBySlug } from "@/lib/mdx/resources";
 import { siteConfig } from "@/config/site.config";
 import { ArticleLayout } from "@/components/mdx/ArticleLayout";
 import { mdxComponents } from "@/components/mdx/mdx-components";
 
 export async function generateStaticParams() {
-  return getAllGuides().map((g) => ({ slug: g.slug }));
+  return getAllResourceArticles().map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({
@@ -17,30 +17,34 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const guide = getGuideBySlug(slug);
-  if (!guide) return {};
+  const article = getResourceArticleBySlug(slug);
+  if (!article) return {};
   return {
-    title: guide.frontmatter.title,
-    description: guide.frontmatter.description,
-    alternates: { canonical: `/guides/${slug}` },
+    title: article.frontmatter.title,
+    description: article.frontmatter.description,
+    alternates: { canonical: `/resources/${slug}` },
     openGraph: {
-      title: guide.frontmatter.title,
-      description: guide.frontmatter.description,
-      url: `${siteConfig.url}/guides/${slug}`,
+      title: article.frontmatter.title,
+      description: article.frontmatter.description,
+      url: `${siteConfig.url}/resources/${slug}`,
       type: "article",
     },
   };
 }
 
-export default async function GuidePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ResourceArticlePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
-  const guide = getGuideBySlug(slug);
-  if (!guide) notFound();
+  const article = getResourceArticleBySlug(slug);
+  if (!article) notFound();
 
   return (
-    <ArticleLayout frontmatter={guide.frontmatter}>
+    <ArticleLayout frontmatter={article.frontmatter} eyebrow="Must Read">
       <MDXRemote
-        source={guide.content}
+        source={article.content}
         options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
         components={mdxComponents}
       />
