@@ -1,20 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ArticleFrontmatter } from "@/lib/mdx/content";
-import { RecommendationModule } from "@/components/monetization/RecommendationModule";
-import { getRecommendationsForCategory, type RecommendationCategory } from "@/config/recommendations.config";
 
 const CALCULATOR_LABELS: Record<ArticleFrontmatter["relatedCalculator"], string> = {
   "fire-age-calculator": "FIRE Age Calculator",
   "fire-number-calculator": "FIRE Number Calculator",
-};
-
-const CALCULATOR_RECOMMENDATION_SIGNAL: Record<
-  ArticleFrontmatter["relatedCalculator"],
-  { forCategory: RecommendationCategory }
-> = {
-  "fire-age-calculator": { forCategory: "diversification" },
-  "fire-number-calculator": { forCategory: "platform-comparison" },
 };
 
 export function ArticleLayout({
@@ -28,7 +18,6 @@ export function ArticleLayout({
 }) {
   const calculatorHref = `/${frontmatter.relatedCalculator}`;
   const calculatorLabel = CALCULATOR_LABELS[frontmatter.relatedCalculator];
-  const recCategory = CALCULATOR_RECOMMENDATION_SIGNAL[frontmatter.relatedCalculator].forCategory;
 
   return (
     <article className="mx-auto max-w-[720px] px-5 pb-20 pt-10">
@@ -53,11 +42,6 @@ export function ArticleLayout({
           Try the {calculatorLabel} →
         </Link>
       </div>
-
-      <RecommendationModule
-        items={getRecommendationsForCategory(recCategory, 2)}
-        heading="You might also find useful"
-      />
     </article>
   );
 }
