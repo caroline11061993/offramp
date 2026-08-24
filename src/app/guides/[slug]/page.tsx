@@ -3,6 +3,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import type { Metadata } from "next";
 import { getAllGuides, getGuideBySlug } from "@/lib/mdx/guides";
+import { getNextArticle } from "@/lib/mdx/content";
 import { siteConfig } from "@/config/site.config";
 import { ArticleLayout } from "@/components/mdx/ArticleLayout";
 import { mdxComponents } from "@/components/mdx/mdx-components";
@@ -37,8 +38,13 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
   const guide = getGuideBySlug(slug);
   if (!guide) notFound();
 
+  const next = getNextArticle(getAllGuides(), slug);
+
   return (
-    <ArticleLayout frontmatter={guide.frontmatter}>
+    <ArticleLayout
+      frontmatter={guide.frontmatter}
+      nextArticle={next ? { href: `/guides/${next.slug}`, title: next.frontmatter.title } : null}
+    >
       <MDXRemote
         source={guide.content}
         options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}

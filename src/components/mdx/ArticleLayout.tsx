@@ -10,10 +10,12 @@ const CALCULATOR_LABELS: Record<ArticleFrontmatter["relatedCalculator"], string>
 export function ArticleLayout({
   frontmatter,
   eyebrow = "Guide",
+  nextArticle,
   children,
 }: {
   frontmatter: ArticleFrontmatter;
   eyebrow?: string;
+  nextArticle?: { href: string; title: string } | null;
   children: ReactNode;
 }) {
   const calculatorHref = `/${frontmatter.relatedCalculator}`;
@@ -42,6 +44,16 @@ export function ArticleLayout({
           Try the {calculatorLabel} →
         </Link>
       </div>
+
+      {nextArticle ? (
+        <Link
+          href={nextArticle.href}
+          className="mt-4 block rounded-[var(--radius-token)] border border-line bg-card p-4 shadow-sm transition-colors hover:border-accent-dim"
+        >
+          <div className="font-data text-[10px] uppercase tracking-wide text-text-faint">Next article</div>
+          <div className="mt-1 font-heading text-[14px] font-semibold text-ink">{nextArticle.title} →</div>
+        </Link>
+      ) : null}
     </article>
   );
 }

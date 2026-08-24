@@ -47,3 +47,13 @@ export function getArticleBySlug(dir: string, slug: string): Article | null {
   if (!fs.existsSync(filePath)) return null;
   return readArticleFile(dir, `${slug}.mdx`);
 }
+
+/** Next article after `currentSlug`, in the same (newest-first) order the
+ *  index page lists them, wrapping back to the first once past the end.
+ *  Returns null when the collection has 0 or 1 articles — nothing to link to. */
+export function getNextArticle(all: Article[], currentSlug: string): Article | null {
+  if (all.length < 2) return null;
+  const index = all.findIndex((a) => a.slug === currentSlug);
+  if (index === -1) return null;
+  return all[(index + 1) % all.length];
+}

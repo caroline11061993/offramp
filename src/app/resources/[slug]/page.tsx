@@ -3,6 +3,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import type { Metadata } from "next";
 import { getAllResourceArticles, getResourceArticleBySlug } from "@/lib/mdx/resources";
+import { getNextArticle } from "@/lib/mdx/content";
 import { siteConfig } from "@/config/site.config";
 import { ArticleLayout } from "@/components/mdx/ArticleLayout";
 import { mdxComponents } from "@/components/mdx/mdx-components";
@@ -41,8 +42,14 @@ export default async function ResourceArticlePage({
   const article = getResourceArticleBySlug(slug);
   if (!article) notFound();
 
+  const next = getNextArticle(getAllResourceArticles(), slug);
+
   return (
-    <ArticleLayout frontmatter={article.frontmatter} eyebrow="Must Read">
+    <ArticleLayout
+      frontmatter={article.frontmatter}
+      eyebrow="Must Read"
+      nextArticle={next ? { href: `/resources/${next.slug}`, title: next.frontmatter.title } : null}
+    >
       <MDXRemote
         source={article.content}
         options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
