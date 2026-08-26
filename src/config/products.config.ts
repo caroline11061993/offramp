@@ -15,7 +15,7 @@ export const products: Product[] = [
     name: "UK Savings Rate & FIRE Budget Planner",
     tagline:
       "See exactly how much sooner you could reach financial independence — just by adjusting your spending.",
-    price: "£9.99",
+    price: "£10",
     payhipLink: "https://payhip.com/b/mvh3f",
     description:
       "Most budget planners stop at tracking where your money goes. This one goes a step further: every category is linked to a live projection, so you can see in real time how a £50 cut to one line item moves your actual FIRE date — not just your monthly total. It's paired with a UK tax year tracker so you're not leaving ISA, LISA or pension allowance unused before the 5 April deadline.",
