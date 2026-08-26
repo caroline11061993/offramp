@@ -29,8 +29,8 @@ export default function AboutPage() {
           Claude Code.
         </p>
         <p>
-          I&apos;m 30+, and I&apos;ve spent years climbing the career ladder in tech. But what I
-          really want is simple: to do creative work, help people, and cook good food.
+          I&apos;m in my 30s, and after years in tech, my priorities are simple: create meaningful
+          work, help people, and cook great food.
         </p>
         <p>
           The problem? Wanting a different life and being able to afford it are two very different
