@@ -29,8 +29,8 @@ export default function AboutPage() {
           Claude Code.
         </p>
         <p>
-          I&apos;m in my 30s, and after years in tech, my priorities are simple: create meaningful
-          work, help people, and cook great food.
+          I&apos;m in my 30s, and after years in tech, my priorities are simple: do creative work,
+          help people, cook good food, and relax.
         </p>
         <p>
           The problem? Wanting a different life and being able to afford it are two very different
