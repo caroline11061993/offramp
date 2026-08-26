@@ -8,7 +8,7 @@ export default function Home() {
     <main className="mx-auto max-w-[1040px] px-5 pb-20 pt-14">
       <header className="mb-12 max-w-[62ch]">
         <h1 className="font-heading text-[clamp(34px,6vw,52px)] font-bold leading-[1.08] text-ink">
-          Find your <em className="not-italic text-accent">offramp</em>.
+          Find our <em className="not-italic text-accent">offramp</em>.
         </h1>
         <p className="mt-4 font-body text-[17px] italic text-accent-dim">
           When does work become optional? How big does the number actually need to be?

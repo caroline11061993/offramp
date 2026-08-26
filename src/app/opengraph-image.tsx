@@ -23,7 +23,7 @@ export default async function Image() {
         </div>
         <div style={{ display: "flex", fontSize: 96, fontWeight: 700, marginTop: 24 }}>
           <span>
-            Find your <span style={{ color: "#d97757" }}>offramp</span>.
+            Find our <span style={{ color: "#d97757" }}>offramp</span>.
           </span>
         </div>
         <div style={{ display: "flex", fontSize: 28, color: "#6b6862", marginTop: 24, maxWidth: 900 }}>
