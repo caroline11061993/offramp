@@ -16,6 +16,7 @@ export const ArticleFrontmatterSchema = z.object({
   updatedAt: z.string().optional(),
   relatedCalculator: z.enum(["fire-age-calculator", "fire-number-calculator"]),
   dek: z.string().optional(), // short on-page explainer, if different from meta description
+  showStoreCta: z.boolean().optional(), // opt-in per article — defaults to no CTA
 });
 export type ArticleFrontmatter = z.infer<typeof ArticleFrontmatterSchema>;
 

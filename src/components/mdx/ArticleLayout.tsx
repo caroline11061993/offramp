@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ArticleFrontmatter } from "@/lib/mdx/content";
+import { ProductCTA } from "@/components/ProductCTA";
 
 const CALCULATOR_LABELS: Record<ArticleFrontmatter["relatedCalculator"], string> = {
   "fire-age-calculator": "FIRE Age Calculator",
@@ -34,6 +35,8 @@ export function ArticleLayout({
       </div>
 
       <div className="prose-guide mt-8">{children}</div>
+
+      {frontmatter.showStoreCta ? <ProductCTA slug="budget-planner" variant="compact" /> : null}
 
       <div className="mt-10 rounded-[var(--radius-token)] border border-accent-dim bg-accent-soft p-4">
         <div className="font-heading text-[13px] font-semibold text-ink">Ready to run your own numbers?</div>

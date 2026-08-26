@@ -9,6 +9,7 @@ import { Toggle } from "@/components/ui/Toggle";
 import { FireNumberChart } from "./FireNumberChart";
 import { RecommendationModule } from "@/components/monetization/RecommendationModule";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { ProductCTA } from "@/components/ProductCTA";
 
 export function FireNumberResults({ state }: { state: FireNumberInputs }) {
   const result = useMemo(() => calcFireNumber(state), [state]);
@@ -48,6 +49,12 @@ export function FireNumberResults({ state }: { state: FireNumberInputs }) {
                   : ""
         }
       />
+
+      {verdict.kind !== "noRetirementWindow" && verdict.kind !== "indeterminate" ? (
+        <div className="mt-4">
+          <ProductCTA slug="budget-planner" />
+        </div>
+      ) : null}
 
       <div className="mb-1 mt-6 font-data text-[11px] uppercase tracking-wide text-accent-dim">
         Quick rule of thumb

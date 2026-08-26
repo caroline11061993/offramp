@@ -9,6 +9,7 @@ import { FireAgeExplorerChart } from "./FireAgeExplorerChart";
 import { FireAgeYearTable } from "./FireAgeYearTable";
 import { RecommendationModule } from "@/components/monetization/RecommendationModule";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { ProductCTA } from "@/components/ProductCTA";
 
 export function FireAgeResults({ state }: { state: FireAgeFormState }) {
   const inputs = useMemo(() => toFireAgeInputs(state), [state]);
@@ -39,11 +40,16 @@ export function FireAgeResults({ state }: { state: FireAgeFormState }) {
           spending above.
         </div>
       ) : (
-        <ResultHero
-          label="Based on everything you've entered, you can likely retire at"
-          value={`Age ${recommendedAge}`}
-          sub={`That's ${recommendedAge - inputs.currentAge} year${recommendedAge - inputs.currentAge === 1 ? "" : "s"} from now. Drag the slider below to see what happens at any other age.`}
-        />
+        <>
+          <ResultHero
+            label="Based on everything you've entered, you can likely retire at"
+            value={`Age ${recommendedAge}`}
+            sub={`That's ${recommendedAge - inputs.currentAge} year${recommendedAge - inputs.currentAge === 1 ? "" : "s"} from now. Drag the slider below to see what happens at any other age.`}
+          />
+          <div className="mb-4">
+            <ProductCTA slug="budget-planner" />
+          </div>
+        </>
       )}
 
       <div className="mb-4 rounded-[var(--radius-token)] border border-line bg-card p-5 shadow-sm">
