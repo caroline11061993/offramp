@@ -10,7 +10,7 @@ export const siteConfig = {
     { label: "FIRE Number Calculator", href: "/fire-number-calculator" },
     { label: "Guides", href: "/guides" },
     { label: "Must Read", href: "/resources" },
-    { label: "Store", href: "/store" },
+    { label: "Product", href: "/store" },
     { label: "About", href: "/about" },
   ],
 } as const;

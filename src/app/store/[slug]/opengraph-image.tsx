@@ -7,7 +7,7 @@ export const contentType = "image/png";
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = getProduct(slug);
-  const title = product?.name ?? "Store";
+  const title = product?.name ?? "Product";
 
   return new ImageResponse(
     (
@@ -24,7 +24,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         }}
       >
         <div style={{ display: "flex", fontSize: 22, color: "#c9633f", letterSpacing: 2 }}>
-          OUR OFFRAMP · STORE
+          OUR OFFRAMP · PRODUCT
         </div>
         <div style={{ display: "flex", fontSize: 60, fontWeight: 700, marginTop: 24, maxWidth: 980 }}>
           {title}

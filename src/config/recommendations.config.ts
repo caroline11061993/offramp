@@ -18,6 +18,8 @@ export interface RecommendationItem {
   href: string; // affiliate/direct link — swap without touching component code
   ctaLabel: string;
   disclosure?: string; // e.g. "Affiliate link" — shown inline near the CTA
+  /** No partner signed yet — excluded from every lookup below until this is removed. */
+  placeholder?: boolean;
 }
 
 /**
@@ -73,6 +75,7 @@ export const RECOMMENDATION_ITEMS: RecommendationItem[] = [
     description: "Placeholder: a partner that helps close a large gap-to-retirement with extra income.",
     href: "#",
     ctaLabel: "Learn more",
+    placeholder: true,
   },
   {
     id: "placeholder-decumulation-1",
@@ -81,6 +84,7 @@ export const RECOMMENDATION_ITEMS: RecommendationItem[] = [
     description: "Placeholder: a partner for people within a few years of their target retirement age.",
     href: "#",
     ctaLabel: "Learn more",
+    placeholder: true,
   },
   {
     id: "placeholder-diversification-1",
@@ -89,6 +93,7 @@ export const RECOMMENDATION_ITEMS: RecommendationItem[] = [
     description: "Placeholder: a partner for users with concentrated single-stock equity positions.",
     href: "#",
     ctaLabel: "Learn more",
+    placeholder: true,
   },
   {
     id: "placeholder-platform-1",
@@ -97,6 +102,7 @@ export const RECOMMENDATION_ITEMS: RecommendationItem[] = [
     description: "Placeholder: a platform-comparison partner for general ISA/SIPP guide traffic.",
     href: "#",
     ctaLabel: "Compare platforms",
+    placeholder: true,
   },
 ];
 
@@ -117,7 +123,7 @@ export function getRecommendationsFor(
 
   for (const category of categories) {
     for (const item of RECOMMENDATION_ITEMS) {
-      if (item.category !== category || seen.has(item.id)) continue;
+      if (item.category !== category || item.placeholder || seen.has(item.id)) continue;
       items.push(item);
       seen.add(item.id);
       if (items.length >= maxItems) return items;
@@ -132,7 +138,10 @@ export function getRecommendationsForCategory(
   category: RecommendationCategory,
   maxItems = 2,
 ): RecommendationItem[] {
-  return RECOMMENDATION_ITEMS.filter((item) => item.category === category).slice(0, maxItems);
+  return RECOMMENDATION_ITEMS.filter((item) => item.category === category && !item.placeholder).slice(
+    0,
+    maxItems,
+  );
 }
 
 export function getRecommendationsByCategory(): Record<RecommendationCategory, RecommendationItem[]> {
@@ -145,7 +154,7 @@ export function getRecommendationsByCategory(): Record<RecommendationCategory, R
   return Object.fromEntries(
     categories.map((category) => [
       category,
-      RECOMMENDATION_ITEMS.filter((item) => item.category === category),
+      RECOMMENDATION_ITEMS.filter((item) => item.category === category && !item.placeholder),
     ]),
   ) as Record<RecommendationCategory, RecommendationItem[]>;
 }

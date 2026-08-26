@@ -42,7 +42,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       <main className="mx-auto max-w-[720px] px-5 pb-20 pt-10">
         <Link href="/store" className="font-heading text-[12.5px] font-semibold text-text-muted hover:text-ink">
-          ← Back to store
+          ← Back to product
         </Link>
 
         <section className="mt-6 text-center">

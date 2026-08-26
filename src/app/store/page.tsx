@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { products } from "@/config/products.config";
 import { siteConfig } from "@/config/site.config";
 
-const title = "Store";
+const title = "Product";
 const description = "Tools and templates to help you plan your UK FIRE journey — beyond what the free calculators cover.";
 
 export const metadata: Metadata = {

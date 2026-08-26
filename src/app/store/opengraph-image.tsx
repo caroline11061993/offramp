@@ -19,9 +19,9 @@ export default async function Image() {
         }}
       >
         <div style={{ display: "flex", fontSize: 22, color: "#c9633f", letterSpacing: 2 }}>
-          OUR OFFRAMP · STORE
+          OUR OFFRAMP · PRODUCT
         </div>
-        <div style={{ display: "flex", fontSize: 72, fontWeight: 700, marginTop: 24 }}>Store</div>
+        <div style={{ display: "flex", fontSize: 72, fontWeight: 700, marginTop: 24 }}>Product</div>
         <div style={{ display: "flex", fontSize: 28, color: "#6b6862", marginTop: 24, maxWidth: 820 }}>
           Tools and templates to help you plan your UK FIRE journey.
         </div>
