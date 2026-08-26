@@ -19,7 +19,7 @@ export default async function Image() {
         }}
       >
         <div style={{ display: "flex", fontSize: 22, color: "#c9633f", letterSpacing: 2 }}>
-          OFFRAMP · UK FIRE CALCULATOR
+          OUR OFFRAMP · UK FIRE CALCULATOR
         </div>
         <div style={{ display: "flex", fontSize: 72, fontWeight: 700, marginTop: 24, maxWidth: 900 }}>
           FIRE Age Calculator

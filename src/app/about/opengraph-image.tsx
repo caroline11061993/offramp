@@ -19,7 +19,7 @@ export default async function Image() {
         }}
       >
         <div style={{ display: "flex", fontSize: 22, color: "#c9633f", letterSpacing: 2 }}>
-          OFFRAMP · ABOUT
+          OUR OFFRAMP · ABOUT
         </div>
         <div style={{ display: "flex", fontSize: 68, fontWeight: 700, marginTop: 24, maxWidth: 950 }}>
           Why I built Offramp

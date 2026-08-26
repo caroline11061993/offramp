@@ -24,7 +24,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         }}
       >
         <div style={{ display: "flex", fontSize: 22, color: "#c9633f", letterSpacing: 2 }}>
-          OFFRAMP · GUIDE
+          OUR OFFRAMP · GUIDE
         </div>
         <div style={{ display: "flex", fontSize: 60, fontWeight: 700, marginTop: 24, maxWidth: 980 }}>
           {title}

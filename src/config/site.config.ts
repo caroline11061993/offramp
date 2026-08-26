@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: "Offramp",
+  name: "Our Offramp",
   tagline: "Find your offramp.",
   description:
     "Free UK FIRE calculators. Find the age financial independence becomes possible, or the number you need to get there — full year-by-year simulation with real UK tax bands built in.",

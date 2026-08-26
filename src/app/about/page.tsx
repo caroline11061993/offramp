@@ -4,7 +4,7 @@ import { siteConfig } from "@/config/site.config";
 
 const title = "About";
 const description =
-  "Why I built Offramp — a personal note on FIRE, career ladders, and wanting real numbers instead of generic calculators.";
+  "Why I built Our Offramp — a personal note on FIRE, career ladders, and wanting real numbers instead of generic calculators.";
 
 export const metadata: Metadata = {
   title,
@@ -20,13 +20,13 @@ export default function AboutPage() {
         About
       </div>
       <h1 className="font-heading text-[clamp(28px,5vw,38px)] font-bold leading-tight text-ink">
-        Why I built Offramp
+        Why I built Our Offramp
       </h1>
 
       <div className="prose-guide mt-8">
         <p>
-          Find Your Offramp started with me sitting at the dinner table after work, messing around
-          with Claude Code.
+          Our Offramp started with me sitting at the dinner table after work, messing around with
+          Claude Code.
         </p>
         <p>
           I&apos;m 30+, and I&apos;ve spent years climbing the career ladder in tech. But what I
@@ -48,8 +48,8 @@ export default function AboutPage() {
         </p>
         <p>
           If you&apos;ve climbed further than you expected to and are wondering whether
-          there&apos;s another version of your life available to you, Find Your Offramp is for you
-          — with the calculators, tools, and resources I wish I&apos;d had sooner.
+          there&apos;s another version of your life available to you, Our Offramp is for you — with
+          the calculators, tools, and resources I wish I&apos;d had sooner.
         </p>
       </div>
 

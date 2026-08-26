@@ -19,7 +19,7 @@ export default async function Image() {
         }}
       >
         <div style={{ display: "flex", fontSize: 22, color: "#c9633f", letterSpacing: 2 }}>
-          OFFRAMP · MUST READ
+          OUR OFFRAMP · MUST READ
         </div>
         <div style={{ display: "flex", fontSize: 72, fontWeight: 700, marginTop: 24 }}>Must Read</div>
         <div style={{ display: "flex", fontSize: 28, color: "#6b6862", marginTop: 24, maxWidth: 820 }}>
