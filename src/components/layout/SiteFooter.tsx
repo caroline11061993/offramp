@@ -1,0 +1,19 @@
+import { siteConfig } from "@/config/site.config";
+
+export function SiteFooter() {
+  return (
+    <footer className="mt-16 border-t border-line">
+      <div className="mx-auto flex max-w-[1040px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-6">
+        <p className="font-body text-[12.5px] text-text-faint">
+          © {new Date().getFullYear()} {siteConfig.name}
+        </p>
+        <a
+          href="#"
+          className="termly-display-preferences font-heading text-[12.5px] font-semibold text-text-muted hover:text-ink"
+        >
+          Consent Preferences
+        </a>
+      </div>
+    </footer>
+  );
+}

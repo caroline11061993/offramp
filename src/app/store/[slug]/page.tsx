@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { products, getProduct } from "@/config/products.config";
 import { siteConfig } from "@/config/site.config";
+import { PayhipBuyButton } from "@/components/store/PayhipBuyButton";
 
 export async function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
@@ -52,13 +53,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p className="mt-4 font-body text-[16px] text-text-muted">{product.tagline}</p>
 
           <div className="mt-6">
-            <a
-              href={product.payhipLink}
-              className="payhip-buy-button inline-block rounded-lg bg-accent px-7 py-3 font-heading text-[14px] font-semibold text-white shadow hover:bg-accent-dim"
-              data-theme="none"
-            >
-              Get it — {product.price}
-            </a>
+            <PayhipBuyButton href={product.payhipLink} price={product.price} product={product.slug} />
             <p className="mt-2 text-[12px] text-text-faint">
               Instant download. Works in Excel and Google Sheets.
             </p>
@@ -100,13 +95,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </section>
 
         <section className="mt-14 text-center">
-          <a
-            href={product.payhipLink}
-            className="payhip-buy-button inline-block rounded-lg bg-accent px-7 py-3 font-heading text-[14px] font-semibold text-white shadow hover:bg-accent-dim"
-            data-theme="none"
-          >
-            Get it — {product.price}
-          </a>
+          <PayhipBuyButton href={product.payhipLink} price={product.price} product={product.slug} />
         </section>
       </main>
     </>
