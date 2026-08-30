@@ -1,14 +1,10 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Poppins, Lora, IBM_Plex_Mono } from "next/font/google";
 import { siteConfig } from "@/config/site.config";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import TermlyCMP from "@/components/TermlyCMP";
 import "./globals.css";
-
-const TERMLY_WEBSITE_UUID = "75d23734-ca56-4d91-8094-f171eb3bd53f";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -57,18 +53,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${poppins.variable} ${lora.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      {/* Termly's CMP script mutates the DOM on mount (it injects its own consent-banner nodes),
-          so content here will legitimately differ between server and client on first paint —
-          suppress the resulting hydration warning here, per Termly's own Next.js install guide. */}
-      <body className="min-h-full bg-bg text-ink" suppressHydrationWarning>
-        {/* GA4 — type="text/plain" + data-category makes Termly's auto-blocker hold this until Analytics consent is granted */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-W8YT2KVG5Q"
-          strategy="afterInteractive"
-          type="text/plain"
-          data-category="C0002"
-        />
-        <Script id="ga4-init" strategy="afterInteractive" type="text/plain" data-category="C0002">
+      <body className="min-h-full bg-bg text-ink">
+        {/* GA4 — loads unconditionally for all visitors, not gated behind cookie consent */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-W8YT2KVG5Q" strategy="afterInteractive" />
+        <Script id="ga4-init" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -81,9 +69,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         {children}
         <SiteFooter />
-        <Suspense fallback={null}>
-          <TermlyCMP websiteUUID={TERMLY_WEBSITE_UUID} autoBlock />
-        </Suspense>
       </body>
     </html>
   );
