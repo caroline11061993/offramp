@@ -45,6 +45,9 @@ export const metadata: Metadata = {
     title: `${siteConfig.name} — UK FIRE Calculator`,
     description: siteConfig.description,
   },
+  verification: {
+    google: "IwXOiCWc3VeGKEZD0NLqeQl0eoHH_BIYKSK0OwGQvl8",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
