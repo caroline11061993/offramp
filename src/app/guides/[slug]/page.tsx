@@ -7,6 +7,8 @@ import { getNextArticle } from "@/lib/mdx/content";
 import { siteConfig } from "@/config/site.config";
 import { ArticleLayout } from "@/components/mdx/ArticleLayout";
 import { mdxComponents } from "@/components/mdx/mdx-components";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { articleJsonLd } from "@/lib/seo/schema";
 
 export async function generateStaticParams() {
   return getAllGuides().map((g) => ({ slug: g.slug }));
@@ -41,15 +43,26 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
   const next = getNextArticle(getAllGuides(), slug);
 
   return (
-    <ArticleLayout
-      frontmatter={guide.frontmatter}
-      nextArticle={next ? { href: `/guides/${next.slug}`, title: next.frontmatter.title } : null}
-    >
-      <MDXRemote
-        source={guide.content}
-        options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
-        components={mdxComponents}
+    <>
+      <JsonLd
+        data={articleJsonLd({
+          title: guide.frontmatter.title,
+          description: guide.frontmatter.description,
+          path: `/guides/${slug}`,
+          publishedAt: guide.frontmatter.publishedAt,
+          updatedAt: guide.frontmatter.updatedAt,
+        })}
       />
-    </ArticleLayout>
+      <ArticleLayout
+        frontmatter={guide.frontmatter}
+        nextArticle={next ? { href: `/guides/${next.slug}`, title: next.frontmatter.title } : null}
+      >
+        <MDXRemote
+          source={guide.content}
+          options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+          components={mdxComponents}
+        />
+      </ArticleLayout>
+    </>
   );
 }

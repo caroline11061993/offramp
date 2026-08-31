@@ -7,6 +7,8 @@ import { getNextArticle } from "@/lib/mdx/content";
 import { siteConfig } from "@/config/site.config";
 import { ArticleLayout } from "@/components/mdx/ArticleLayout";
 import { mdxComponents } from "@/components/mdx/mdx-components";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { articleJsonLd } from "@/lib/seo/schema";
 
 export async function generateStaticParams() {
   return getAllResourceArticles().map((a) => ({ slug: a.slug }));
@@ -45,16 +47,27 @@ export default async function ResourceArticlePage({
   const next = getNextArticle(getAllResourceArticles(), slug);
 
   return (
-    <ArticleLayout
-      frontmatter={article.frontmatter}
-      eyebrow="Must Read"
-      nextArticle={next ? { href: `/resources/${next.slug}`, title: next.frontmatter.title } : null}
-    >
-      <MDXRemote
-        source={article.content}
-        options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
-        components={mdxComponents}
+    <>
+      <JsonLd
+        data={articleJsonLd({
+          title: article.frontmatter.title,
+          description: article.frontmatter.description,
+          path: `/resources/${slug}`,
+          publishedAt: article.frontmatter.publishedAt,
+          updatedAt: article.frontmatter.updatedAt,
+        })}
       />
-    </ArticleLayout>
+      <ArticleLayout
+        frontmatter={article.frontmatter}
+        eyebrow="Must Read"
+        nextArticle={next ? { href: `/resources/${next.slug}`, title: next.frontmatter.title } : null}
+      >
+        <MDXRemote
+          source={article.content}
+          options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+          components={mdxComponents}
+        />
+      </ArticleLayout>
+    </>
   );
 }
