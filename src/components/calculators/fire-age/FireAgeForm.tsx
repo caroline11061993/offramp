@@ -183,6 +183,36 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
           />
         </div>
 
+        <SubHeading>Defined Benefit (final salary / career average) pension</SubHeading>
+        <Toggle
+          label="I have a DB pension"
+          checked={state.dbPensionOn}
+          onChange={(v) => onChange({ dbPensionOn: v })}
+        />
+        <div className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${state.dbPensionOn ? "" : "opacity-40"}`}>
+          <NumberField
+            label="Annual income at normal pension age"
+            value={state.dbPensionAnnual0}
+            step={500}
+            onChange={(v) => onChange({ dbPensionAnnual0: v })}
+            info="The guaranteed annual income your scheme quotes — a fixed income stream, not a pot you can run down."
+          />
+          <NumberField
+            label="Scheme's normal pension age"
+            value={state.dbPensionNormalAge}
+            onChange={(v) => onChange({ dbPensionNormalAge: v })}
+            hint="often 60 or 65"
+          />
+          <NumberField
+            label="Early access reduction"
+            value={toPercentInput(state.dbPensionReductionRate)}
+            step={0.5}
+            onChange={(v) => onChange({ dbPensionReductionRate: fromPercentInput(v) })}
+            hint="%/yr claimed before normal age"
+            info="Most schemes permanently reduce your income for every year you claim before the normal pension age — 5% a year is a reasonable estimate if your scheme's exact figure isn't to hand. You can't claim before your pension access age above, and claiming at or after the normal pension age draws the full amount."
+          />
+        </div>
+
         <div className="flex justify-end pt-1">
           <button
             type="button"

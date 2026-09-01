@@ -36,6 +36,10 @@ const defaultInputs: FireAgeInputs = {
   spOn: true,
   spAge: 67,
   spAmount0: 11500,
+  dbPensionOn: false,
+  dbPensionAnnual0: 0,
+  dbPensionNormalAge: 65,
+  dbPensionReductionRate: 0.05,
   eqOn: false,
   eqShares: 0,
   eqPrice: 0,
@@ -219,5 +223,52 @@ describe("simulate — LISA", () => {
     );
     expect(unlockedResult.survived).toBe(true);
     expect(unlockedResult.rows.find((r) => r.age === 60)!.lisa).toBeLessThan(50000);
+  });
+});
+
+describe("simulate — DB (defined benefit) pension", () => {
+  const dbBase: FireAgeInputs = {
+    ...defaultInputs,
+    currentAge: 55,
+    pensionAccess: 55,
+    inflation: 0,
+    growth: 0,
+    pensionGrowth: 0,
+    spOn: false,
+    dbPensionOn: true,
+    dbPensionAnnual0: 10000,
+    dbPensionNormalAge: 65,
+    dbPensionReductionRate: 0.05,
+  };
+
+  it("pays nothing when dbPensionOn is off, even with an annual amount set", () => {
+    const result = simulate({ ...dbBase, dbPensionOn: false }, 55, false);
+    expect(result.rows.find((r) => r.age === 55)!.dbPensionPaid).toBe(0);
+  });
+
+  it("pays the full amount, unreduced, when claimed at or after the scheme's normal pension age", () => {
+    const result = simulate({ ...dbBase, currentAge: 65 }, 65, false);
+    expect(result.rows.find((r) => r.age === 65)!.dbPensionPaid).toBeCloseTo(10000, 4);
+    // A year past normal age doesn't earn a bonus in this simplified model — still full amount.
+    const later = simulate({ ...dbBase, currentAge: 65, lifeExpectancy: 90 }, 65, false);
+    expect(later.rows.find((r) => r.age === 66)!.dbPensionPaid).toBeCloseTo(10000, 4);
+  });
+
+  it("reduces the annual amount by the reduction rate for each year claimed before normal age", () => {
+    // Retiring/claiming at 55, 10 years before normal age 65, at 5%/yr: 10000 * (1 - 0.5) = 5000.
+    const result = simulate(dbBase, 55, false);
+    expect(result.rows.find((r) => r.age === 55)!.dbPensionPaid).toBeCloseTo(5000, 4);
+    // Five years later (age 60), 5 years early: 10000 * (1 - 0.25) = 7500.
+    expect(result.rows.find((r) => r.age === 60)!.dbPensionPaid).toBeCloseTo(7500, 4);
+  });
+
+  it("directly reduces how much needs to be drawn from other pots", () => {
+    const withDb = simulate(dbBase, 55, false);
+    const withoutDb = simulate({ ...dbBase, dbPensionOn: false }, 55, false);
+    const isaAt55 = (r: typeof withDb) => r.rows.find((row) => row.age === 55)!.isa;
+    // Same starting ISA balance, same spend, no growth — the DB pension should leave
+    // strictly more in the ISA in the very first retired year, since it's covering
+    // part of spend directly instead of that shortfall being drawn from savings.
+    expect(isaAt55(withDb)).toBeGreaterThan(isaAt55(withoutDb));
   });
 });

@@ -67,6 +67,20 @@ export interface FireAgeInputs {
   spAge: number;
   spAmount0: number; // today's £
 
+  dbPensionOn: boolean;
+  /** Annual income the scheme would pay at dbPensionNormalAge, today's £ — not a pot,
+   *  an income stream, taxed the same simplified way as the State Pension (netted
+   *  straight off required spending rather than run through calcTax). */
+  dbPensionAnnual0: number;
+  /** The scheme's own Normal Pension Age — full, un-reduced income from here. */
+  dbPensionNormalAge: number;
+  /** Fraction knocked off dbPensionAnnual0 for every year it's claimed before
+   *  dbPensionNormalAge (a linear approximation of real schemes' actuarial reduction
+   *  tables — e.g. 0.05 knocks off 5% per early year). Claiming can't start before
+   *  pensionAccess, same floor as the DC pension; claiming at or after
+   *  dbPensionNormalAge draws the full amount with no reduction. */
+  dbPensionReductionRate: number;
+
   eqOn: boolean;
   eqShares: number;
   eqPrice: number; // £/share, today's £
@@ -103,6 +117,9 @@ export interface FireAgeYearRow {
   total: number;
   retired: boolean;
   spend: number;
+  /** DB pension income actually paid this year (0 before pensionAccess, 0 if dbPensionOn
+   *  is off, reduced below dbPensionAnnual0 if claimed before dbPensionNormalAge). */
+  dbPensionPaid: number;
   mortgagePaid: number;
   mortgageBal: number;
   growthRate: number; // echo of inputs.growth, for the year-by-year table
@@ -281,10 +298,17 @@ export function simulate(
       }
     }
 
+    let dbPensionAnnual = 0;
+    if (inp.dbPensionOn && retired && age >= inp.pensionAccess) {
+      const yearsEarly = Math.max(0, inp.dbPensionNormalAge - age);
+      const reductionFactor = Math.max(0, 1 - inp.dbPensionReductionRate * yearsEarly);
+      dbPensionAnnual = inp.dbPensionAnnual0 * inflFactor * reductionFactor;
+    }
+
     if (retired) {
       const portfolioBeforeDraw = cash + isa + gia + lisa + equityHeld + pension;
       const spAnnual = inp.spOn && age >= inp.spAge ? inp.spAmount0 * inflFactor : 0;
-      let required = Math.max(0, spendNominal + mortgagePaidThisYear - spAnnual);
+      let required = Math.max(0, spendNominal + mortgagePaidThisYear - spAnnual - dbPensionAnnual);
       if (firstYearDraw === null) {
         firstYearDraw = required;
         firstYearPortfolio = portfolioBeforeDraw;
@@ -359,6 +383,7 @@ export function simulate(
       total: total / df,
       retired,
       spend: spendNominal / df,
+      dbPensionPaid: dbPensionAnnual / df,
       mortgagePaid: mortgagePaidThisYear / df,
       mortgageBal: mortgageBal / df,
       growthRate: growth,

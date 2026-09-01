@@ -47,6 +47,10 @@ export const FIRE_AGE_DEFAULTS: FireAgeFormState = {
   spOn: true,
   spAge: 67,
   spAmount0: 11500,
+  dbPensionOn: false,
+  dbPensionAnnual0: 0,
+  dbPensionNormalAge: 65,
+  dbPensionReductionRate: 0.05,
   eqOn: false,
   eqShares: 200,
   eqPrice: 50,
@@ -78,7 +82,7 @@ const bool = z.boolean();
 // Fixed-position tuple, one entry per FireAgeFormState field, in a stable declared
 // order. A leading version tag lets a future field addition be detected safely —
 // old shared links with an outdated shape fall back to defaults rather than crash.
-const CODEC_VERSION = 2;
+const CODEC_VERSION = 3;
 
 const fireAgeTupleSchema = z.tuple([
   num, // currentAge
@@ -107,6 +111,10 @@ const fireAgeTupleSchema = z.tuple([
   bool, // spOn
   num, // spAge
   num, // spAmount0
+  bool, // dbPensionOn
+  num, // dbPensionAnnual0
+  num, // dbPensionNormalAge
+  num, // dbPensionReductionRate
   bool, // eqOn
   num, // eqShares
   num, // eqPrice
@@ -148,6 +156,10 @@ function stateToTuple(state: FireAgeFormState): z.infer<typeof fireAgeTupleSchem
     state.spOn,
     state.spAge,
     state.spAmount0,
+    state.dbPensionOn,
+    state.dbPensionAnnual0,
+    state.dbPensionNormalAge,
+    state.dbPensionReductionRate,
     state.eqOn,
     state.eqShares,
     state.eqPrice,
@@ -190,17 +202,21 @@ function tupleToState(t: z.infer<typeof fireAgeTupleSchema>): FireAgeFormState {
     spOn: t[23],
     spAge: t[24],
     spAmount0: t[25],
-    eqOn: t[26],
-    eqShares: t[27],
-    eqPrice: t[28],
-    eqFutureOn: t[29],
-    eqFutureAnnual0: t[30],
-    eqFutureYears: t[31],
-    eqGrowth: t[32],
-    eqMode: t[33],
-    eqGradualPct: t[34],
-    growth: t[35],
-    pensionGrowth: t[36],
+    dbPensionOn: t[26],
+    dbPensionAnnual0: t[27],
+    dbPensionNormalAge: t[28],
+    dbPensionReductionRate: t[29],
+    eqOn: t[30],
+    eqShares: t[31],
+    eqPrice: t[32],
+    eqFutureOn: t[33],
+    eqFutureAnnual0: t[34],
+    eqFutureYears: t[35],
+    eqGrowth: t[36],
+    eqMode: t[37],
+    eqGradualPct: t[38],
+    growth: t[39],
+    pensionGrowth: t[40],
   };
 }
 

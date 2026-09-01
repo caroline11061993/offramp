@@ -37,7 +37,7 @@ const faqs: FaqItem[] = [
   {
     question: "What order does it draw money down from in retirement?",
     answer:
-      "Cheapest tax consequence first: cash, then your GIA, then your ISA, then your LISA once you've turned 60, then your pension once you've reached your access age, and finally property — only if you've opted to include it as a last-resort backstop, and only once everything else is exhausted.",
+      "Cheapest tax consequence first: cash, then your GIA, then your ISA, then your LISA once you've turned 60, then your pension once you've reached your access age, and finally property — only if you've opted to include it as a last-resort backstop, and only once everything else is exhausted. If you have a State Pension or a defined-benefit pension, those pay in as income from their own start ages and reduce how much needs to be drawn from everything else, rather than sitting in the pot order themselves.",
   },
   {
     question: "Does inflation affect the numbers I see?",
