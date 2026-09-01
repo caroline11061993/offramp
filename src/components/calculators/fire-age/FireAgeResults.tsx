@@ -6,6 +6,7 @@ import { toFireAgeInputs, type FireAgeFormState } from "@/lib/url-state/fire-age
 import { fmtGBP, fmtPct } from "@/lib/format";
 import { ResultHero } from "@/components/calculators/shared/ResultHero";
 import { FireAgeExplorerChart } from "./FireAgeExplorerChart";
+import { FireAgeTaxChart } from "./FireAgeTaxChart";
 import { FireAgeYearTable } from "./FireAgeYearTable";
 import { RecommendationModule } from "@/components/monetization/RecommendationModule";
 import { AdSlot } from "@/components/monetization/AdSlot";
@@ -117,6 +118,13 @@ export function FireAgeResults({ state }: { state: FireAgeFormState }) {
               </span>
             ) : null}
           </div>
+        </div>
+
+        <div className="my-3.5 rounded-[var(--radius-token)] border border-line bg-card p-3.5">
+          <div className="mb-2 font-data text-[11px] uppercase tracking-wide text-text-muted">
+            Where your salary actually goes, working years only
+          </div>
+          <FireAgeTaxChart rows={liquidResult.rows} />
         </div>
 
         {clampedTestAge < inputs.pensionAccess ? (

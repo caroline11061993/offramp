@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { simulate, findFireAge, type FireAgeInputs } from "../fire-age";
+import { calcTax } from "../tax";
 
 // Base scenario = the source HTML's own UI defaults, so these tests are checked
 // against the exact same inputs a real user would see on first load.
@@ -402,5 +403,47 @@ describe("simulate — couple mode", () => {
     const withoutPartnerDb = simulate({ ...tight, partnerDbPensionOn: false }, 60, false);
     const isaAt60 = (r: typeof withPartnerDb) => r.rows.find((row) => row.age === 60)!.isa;
     expect(isaAt60(withPartnerDb)).toBeGreaterThan(isaAt60(withoutPartnerDb));
+  });
+});
+
+describe("simulate — tax/NI breakdown row fields", () => {
+  it("matches calcTax exactly for a solo working year", () => {
+    const result = simulate(defaultInputs, 56, false);
+    const row = result.rows.find((r) => r.age === defaultInputs.currentAge)!;
+    // Salary sacrifice is off in defaultInputs, so taxable salary is the full gross.
+    const expected = calcTax(defaultInputs.salary0);
+    expect(row.grossIncome).toBeCloseTo(defaultInputs.salary0, 2);
+    expect(row.incomeTax).toBeCloseTo(expected.tax, 2);
+    expect(row.nationalInsurance).toBeCloseTo(expected.ni, 2);
+    expect(row.takeHomePay).toBeCloseTo(expected.takeHome, 2);
+  });
+
+  it("is entirely zero once retired — salary stops, this isn't DB/State Pension income", () => {
+    const result = simulate(defaultInputs, 56, false);
+    const row = result.rows.find((r) => r.age === 60)!;
+    expect(row.grossIncome).toBe(0);
+    expect(row.incomeTax).toBe(0);
+    expect(row.nationalInsurance).toBe(0);
+    expect(row.takeHomePay).toBe(0);
+  });
+
+  it("sums both partners' gross income, tax, and NI independently in couple mode", () => {
+    const coupleInputs: FireAgeInputs = {
+      ...defaultInputs,
+      coupleMode: true,
+      partnerSalary0: 45000,
+      partnerPension0: 0,
+      partnerPensionContribM: 0,
+      partnerPensionAccess: 57,
+      partnerSalSacrifice: false,
+    };
+    const result = simulate(coupleInputs, 56, false);
+    const row = result.rows.find((r) => r.age === defaultInputs.currentAge)!;
+    const primaryTax = calcTax(defaultInputs.salary0);
+    const partnerTax = calcTax(45000);
+    expect(row.grossIncome).toBeCloseTo(defaultInputs.salary0 + 45000, 2);
+    expect(row.incomeTax).toBeCloseTo(primaryTax.tax + partnerTax.tax, 2);
+    expect(row.nationalInsurance).toBeCloseTo(primaryTax.ni + partnerTax.ni, 2);
+    expect(row.takeHomePay).toBeCloseTo(primaryTax.takeHome + partnerTax.takeHome, 2);
   });
 });

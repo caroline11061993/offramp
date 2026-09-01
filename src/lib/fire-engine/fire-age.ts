@@ -147,6 +147,12 @@ export interface FireAgeYearRow {
    *  the actual couples-mode ask from research, not just a bigger combined number. */
   partnerPension: number;
   partnerDbPensionPaid: number;
+  /** Household gross salary this year — primary + partner if coupleMode is on, 0 once
+   *  retired (salary stops; DB/State Pension income is tracked separately above). */
+  grossIncome: number;
+  incomeTax: number;
+  nationalInsurance: number;
+  takeHomePay: number;
   mortgagePaid: number;
   mortgageBal: number;
   growthRate: number; // echo of inputs.growth, for the year-by-year table
@@ -261,6 +267,10 @@ export function simulate(
     }
 
     let partnerPensionContribThisYear = 0;
+    let grossIncomeThisYear = 0;
+    let incomeTaxThisYear = 0;
+    let niThisYear = 0;
+    let takeHomeThisYear = 0;
     if (!retired) {
       pensionContribThisYear = inp.pensionContribM * 12 * inflFactor;
       pension += pensionContribThisYear;
@@ -271,6 +281,9 @@ export function simulate(
         : salaryNominal;
       const taxResult = calcTax(taxableSalary);
       let takeHome = taxResult.takeHome;
+      grossIncomeThisYear = salaryNominal;
+      incomeTaxThisYear = taxResult.tax;
+      niThisYear = taxResult.ni;
 
       // Partner track: same tax/salary-sacrifice mechanics as the primary person, run
       // independently since UK income tax is assessed per-individual, not jointly.
@@ -284,8 +297,13 @@ export function simulate(
         const partnerTaxableSalary = inp.partnerSalSacrifice
           ? Math.max(0, partnerSalaryNominal - partnerPensionContribThisYear)
           : partnerSalaryNominal;
-        takeHome += calcTax(partnerTaxableSalary).takeHome;
+        const partnerTaxResult = calcTax(partnerTaxableSalary);
+        takeHome += partnerTaxResult.takeHome;
+        grossIncomeThisYear += partnerSalaryNominal;
+        incomeTaxThisYear += partnerTaxResult.tax;
+        niThisYear += partnerTaxResult.ni;
       }
+      takeHomeThisYear = takeHome;
 
       // Equity: gradual sale of currently-held equity, plus new future vesting.
       if (inp.eqOn) {
@@ -448,6 +466,10 @@ export function simulate(
       dbPensionPaid: dbPensionAnnual / df,
       partnerPension: partnerPension / df,
       partnerDbPensionPaid: partnerDbPensionAnnual / df,
+      grossIncome: grossIncomeThisYear / df,
+      incomeTax: incomeTaxThisYear / df,
+      nationalInsurance: niThisYear / df,
+      takeHomePay: takeHomeThisYear / df,
       mortgagePaid: mortgagePaidThisYear / df,
       mortgageBal: mortgageBal / df,
       growthRate: growth,
