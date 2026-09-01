@@ -22,7 +22,7 @@ const faqs: FaqItem[] = [
   {
     question: "Why does it run a simulation instead of using a formula?",
     answer:
-      "Because the things that decide your real retirement age change year to year — UK tax bands, a mortgage that eventually gets paid off, care costs that kick in later, a State Pension that starts at a fixed age. The calculator runs a full year-by-year simulation from your current age to your life expectancy, then repeats it for every possible retirement age from next year onward, and reports the earliest one where the simulation makes it all the way to your life expectancy without running out of money.",
+      "Because the things that decide your real retirement age change year to year — UK tax bands, a mortgage that eventually gets paid off, care costs that kick in later, a State Pension that starts at a fixed age. The calculator runs a full year-by-year simulation from your current age to your life expectancy, then repeats it for every possible retirement age from next year onward, and reports the earliest one that both makes it all the way to your life expectancy without running out of money and keeps its first year of withdrawals at or below a 4% safe withdrawal rate — surviving on paper isn't enough on its own if it only works by drawing down dangerously fast.",
   },
   {
     question: "How does pension access-age locking work?",
@@ -72,8 +72,10 @@ export default function FireAgeCalculatorPage() {
         <p>
           Rather than solving a formula, the calculator tests every possible retirement age one at a
           time — running a full year-by-year simulation of your salary, spending, tax, mortgage, and
-          account balances for each one — and returns the earliest age where the simulation survives
-          all the way to your life expectancy without running out of money.
+          account balances for each one — and returns the earliest age that clears two bars: the money
+          lasts all the way to your life expectancy, and your first year of withdrawals stays at or
+          below a 4% safe withdrawal rate. An age that only survives by drawing down faster than that
+          doesn&apos;t count as a real answer.
         </p>
         <p>
           For the full breakdown of every rule — nominal-vs-real handling, the decumulation order, and
@@ -89,10 +91,11 @@ export default function FireAgeCalculatorPage() {
           assumed at 6%, and a full State Pension from age 67.
         </p>
         <p>
-          Running the simulation for every retirement age from 36 onward, the earliest one that
-          survives all the way to life expectancy is <strong>age 57</strong> — the point where pension
-          access, the State Pension, and the shrinking mortgage all line up with what their liquid
-          savings can carry on their own in the years before.
+          Running the simulation for every retirement age from 36 onward, the earliest one that both
+          survives to life expectancy and keeps its first year of withdrawals at a safe 4% or under is{" "}
+          <strong>age 66</strong> — later than the point where the money technically doesn&apos;t run
+          out, because retiring earlier than that only survives by drawing down faster than a safe
+          margin allows.
         </p>
       </div>
 

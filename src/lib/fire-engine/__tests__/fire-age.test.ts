@@ -48,9 +48,12 @@ const defaultInputs: FireAgeInputs = {
 };
 
 describe("findFireAge — default scenario", () => {
-  it("finds age 56 as the earliest survivable retirement age", () => {
+  it("finds age 64 as the earliest retirement age that both survives and stays within the safe withdrawal-rate ceiling", () => {
+    // Age 56 technically survives on this one deterministic path, but only at an implied
+    // ~8.96% first-year withdrawal rate — more than double the 4% safety ceiling. 64 is the
+    // earliest age where survival isn't just a coincidence of the single path modelled.
     const { age } = findFireAge(defaultInputs, false);
-    expect(age).toBe(56);
+    expect(age).toBe(64);
   });
 
   it("row 0 (age 32) is undeflated (y=0) and matches source defaults plus one year of contribution", () => {
@@ -64,11 +67,21 @@ describe("findFireAge — default scenario", () => {
     expect(first.propertyEquity).toBeCloseTo(100000, 2); // 350000 - 250000
   });
 
-  it("the retirement-year row has the expected implied SWR", () => {
+  it("the retirement-year row has the expected implied SWR, at or under the safety ceiling", () => {
     const { age, result } = findFireAge(defaultInputs, false);
     const retiredRow = result!.rows.find((r) => r.age === age);
     expect(retiredRow).toBeDefined();
-    expect(result!.impliedSWR).toBeCloseTo(0.08957547109318294, 6);
+    expect(result!.impliedSWR).toBeCloseTo(0.03930344057792172, 6);
+    expect(result!.impliedSWR).toBeLessThanOrEqual(0.04);
+  });
+
+  it("returns null when no age in range clears both the survival and SWR-ceiling bars", () => {
+    // A much shorter accumulation window with the same spend leaves no safe age
+    // before the search range runs out.
+    const tightInputs: FireAgeInputs = { ...defaultInputs, currentAge: 55, lifeExpectancy: 90 };
+    const { age, result } = findFireAge(tightInputs, false);
+    expect(age).toBeNull();
+    expect(result).toBeNull();
   });
 });
 

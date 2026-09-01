@@ -1,4 +1,5 @@
 import { calcTax, marginalTaxOnExtra } from "./tax";
+import { MAX_SAFE_WITHDRAWAL_RATE } from "./constants";
 import type { AllocMode, EquityCashOutMode } from "./types";
 
 export interface FireAgeInputs {
@@ -335,12 +336,25 @@ export function simulate(
   return { rows, survived, depletionAge, propertyTapped, impliedSWR };
 }
 
-/** Searches retire ages [currentAge+1, min(currentAge+55, lifeExpectancy)] for the earliest that survives. */
+/**
+ * Searches retire ages [currentAge+1, min(currentAge+55, lifeExpectancy)] for the earliest
+ * that both survives to life expectancy AND keeps its first retired year's implied
+ * withdrawal rate at or below MAX_SAFE_WITHDRAWAL_RATE — bare survival on one deterministic
+ * path isn't enough, since that can happen at withdrawal rates well past any real safety
+ * margin. Returns null if no age in range clears both bars, rather than silently returning
+ * a technically-surviving-but-risky one.
+ */
 export function findFireAge(inp: FireAgeInputs, includeIlliquid: boolean): FireAgeSearchResult {
   const maxAge = Math.min(inp.currentAge + 55, inp.lifeExpectancy);
   for (let r = inp.currentAge + 1; r <= maxAge; r++) {
     const result = simulate(inp, r, includeIlliquid);
-    if (result.survived) return { age: r, result };
+    if (
+      result.survived &&
+      result.impliedSWR !== null &&
+      result.impliedSWR <= MAX_SAFE_WITHDRAWAL_RATE
+    ) {
+      return { age: r, result };
+    }
   }
   return { age: null, result: null };
 }

@@ -35,9 +35,10 @@ export function FireAgeResults({ state }: { state: FireAgeFormState }) {
     <div>
       {!liquidSearch.age ? (
         <div className="mb-4 rounded-[var(--radius-token)] border border-line bg-card p-4 text-[13.5px] text-text-muted">
-          On today&apos;s numbers, your plan doesn&apos;t clear your spending target within the next 55
-          years. Try the slider below to see what changes would help — or revisit contributions and
-          spending above.
+          On today&apos;s numbers, no retirement age in the next 55 years both survives to your life
+          expectancy <em>and</em> keeps your first year of withdrawals at or below a 4% safe withdrawal
+          rate — some ages may technically survive, just not safely. Try the slider below to see what
+          changes would help — or revisit contributions and spending above.
         </div>
       ) : (
         <>
