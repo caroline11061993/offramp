@@ -44,6 +44,11 @@ const faqs: FaqItem[] = [
     answer:
       "Every figure you type in is in today's money, but the simulation itself runs in nominal, inflated pounds internally — because UK tax bands are frozen in nominal terms and a mortgage payment is a fixed nominal amount. The result is converted back to today's money before it's shown to you, so you never see a nominal number, but the maths underneath needed them to correctly capture fiscal drag.",
   },
+  {
+    question: "Can I plan as a couple?",
+    answer:
+      "Yes — a toggle adds a second, independent salary and pension track, since UK income tax is assessed per person rather than jointly. Cash, ISA, LISA and GIA stay as one shared household pot, but salary, pension, and DB pension are tracked separately for each of you, because that's what actually determines whether one of you ends up paying higher-rate tax on drawdown while the other has unused headroom — and the calculator flags it when it spots a real imbalance.",
+  },
 ];
 
 export default function FireAgeCalculatorPage() {

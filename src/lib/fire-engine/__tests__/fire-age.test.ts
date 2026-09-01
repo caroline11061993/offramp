@@ -40,6 +40,16 @@ const defaultInputs: FireAgeInputs = {
   dbPensionAnnual0: 0,
   dbPensionNormalAge: 65,
   dbPensionReductionRate: 0.05,
+  coupleMode: false,
+  partnerSalary0: 0,
+  partnerPension0: 0,
+  partnerPensionContribM: 0,
+  partnerPensionAccess: 57,
+  partnerSalSacrifice: false,
+  partnerDbPensionOn: false,
+  partnerDbPensionAnnual0: 0,
+  partnerDbPensionNormalAge: 65,
+  partnerDbPensionReductionRate: 0.05,
   eqOn: false,
   eqShares: 0,
   eqPrice: 0,
@@ -270,5 +280,127 @@ describe("simulate — DB (defined benefit) pension", () => {
     // strictly more in the ISA in the very first retired year, since it's covering
     // part of spend directly instead of that shortfall being drawn from savings.
     expect(isaAt55(withDb)).toBeGreaterThan(isaAt55(withoutDb));
+  });
+});
+
+describe("simulate — couple mode", () => {
+  const coupleBase: FireAgeInputs = {
+    ...defaultInputs,
+    currentAge: 40,
+    inflation: 0,
+    growth: 0,
+    pensionGrowth: 0,
+    spOn: false,
+    coupleMode: true,
+    partnerSalary0: 50000,
+    partnerPension0: 10000,
+    partnerPensionContribM: 300,
+    partnerPensionAccess: 60,
+    partnerSalSacrifice: false,
+    partnerDbPensionOn: false,
+    partnerDbPensionAnnual0: 0,
+    partnerDbPensionNormalAge: 65,
+    partnerDbPensionReductionRate: 0.05,
+  };
+
+  it("ignores every partner field entirely when coupleMode is off", () => {
+    const withCoupleDataOff = simulate({ ...coupleBase, coupleMode: false }, 70, false);
+    const noPartnerDataAtAll = simulate(
+      { ...defaultInputs, currentAge: 40, inflation: 0, growth: 0, pensionGrowth: 0, spOn: false },
+      70,
+      false,
+    );
+    const row = (r: typeof withCoupleDataOff, age: number) => r.rows.find((x) => x.age === age)!;
+    expect(row(withCoupleDataOff, 41).total).toBeCloseTo(row(noPartnerDataAtAll, 41).total, 4);
+    expect(row(withCoupleDataOff, 41).partnerPension).toBe(0);
+  });
+
+  it("accrues the partner's own pension contributions independently of the primary pension", () => {
+    const result = simulate(coupleBase, 70, false);
+    const at = (age: number) => result.rows.find((r) => r.age === age)!;
+    // Contributions apply from the starting year too (y=0), matching the existing
+    // convention for the primary pension (see "row 0 ... plus one year of contribution"
+    // above): £10,000 + £300/mo * 12 = £13,600 at age 40 itself.
+    expect(at(40).partnerPension).toBeCloseTo(13600, 4);
+    // A second working year adds another £3,600.
+    expect(at(41).partnerPension).toBeCloseTo(17200, 4);
+    // Primary pension (defaultInputs: £40,000 + £400/mo*12) is unaffected by the partner's numbers.
+    expect(at(40).pension).toBeCloseTo(44800, 4);
+  });
+
+  it("adds the partner's take-home pay into household surplus, growing savings faster than solo", () => {
+    const withPartner = simulate(coupleBase, 70, false);
+    const soloOnly = simulate({ ...coupleBase, coupleMode: false }, 70, false);
+    const isaAt41 = (r: typeof withPartner) => r.rows.find((row) => row.age === 41)!.isa;
+    expect(isaAt41(withPartner)).toBeGreaterThan(isaAt41(soloOnly));
+  });
+
+  it("doesn't draw the partner's pension before the partner's own access age, even once other pots are empty", () => {
+    const tight: FireAgeInputs = {
+      ...coupleBase,
+      currentAge: 58,
+      lifeExpectancy: 62,
+      salary0: 0,
+      pensionContribM: 0,
+      partnerPensionContribM: 0,
+      cash0: 1000,
+      isa0: 0,
+      gia0: 0,
+      pension0: 0,
+      spend0: 20000,
+      partnerPensionAccess: 60,
+      partnerPension0: 50000,
+    };
+    // Retiring at 58: partner's pension access age (60) hasn't been reached yet, every
+    // other pot is nearly empty, so the plan shouldn't survive despite £50k sitting in
+    // the partner's pension.
+    const result = simulate(tight, 58, false);
+    expect(result.survived).toBe(false);
+    expect(result.rows.find((r) => r.age === 58)!.partnerPension).toBeCloseTo(50000, 4);
+  });
+
+  it("pays the partner's DB pension once retired and past their access age, reduced for early claiming", () => {
+    const result = simulate(
+      {
+        ...coupleBase,
+        partnerDbPensionOn: true,
+        partnerDbPensionAnnual0: 8000,
+        partnerDbPensionNormalAge: 65,
+        partnerDbPensionReductionRate: 0.05,
+      },
+      60,
+      false,
+    );
+    // Retired at 60, partner's pension access age is 60 (coupleBase), 5 years before
+    // partner's DB normal age of 65: 8000 * (1 - 0.05*5) = 6000.
+    expect(result.rows.find((r) => r.age === 60)!.partnerDbPensionPaid).toBeCloseTo(6000, 4);
+    // Primary DB pension is untouched by the partner's numbers (off by default in coupleBase).
+    expect(result.rows.find((r) => r.age === 60)!.dbPensionPaid).toBe(0);
+  });
+
+  it("partner DB pension directly reduces how much needs to be drawn from other pots", () => {
+    const tight: FireAgeInputs = {
+      ...coupleBase,
+      currentAge: 60,
+      salary0: 0,
+      pensionContribM: 0,
+      partnerPensionContribM: 0,
+      cash0: 2000,
+      isa0: 20000,
+      gia0: 0,
+      pension0: 0,
+      partnerPension0: 0,
+      spend0: 20000,
+      partnerPensionAccess: 60,
+      hasProperty: false,
+    };
+    const withPartnerDb = simulate(
+      { ...tight, partnerDbPensionOn: true, partnerDbPensionAnnual0: 8000, partnerDbPensionNormalAge: 60 },
+      60,
+      false,
+    );
+    const withoutPartnerDb = simulate({ ...tight, partnerDbPensionOn: false }, 60, false);
+    const isaAt60 = (r: typeof withPartnerDb) => r.rows.find((row) => row.age === 60)!.isa;
+    expect(isaAt60(withPartnerDb)).toBeGreaterThan(isaAt60(withoutPartnerDb));
   });
 });

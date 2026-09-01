@@ -81,6 +81,28 @@ export interface FireAgeInputs {
    *  dbPensionNormalAge draws the full amount with no reduction. */
   dbPensionReductionRate: number;
 
+  /**
+   * Couple mode: models a second person's salary, DC pension, and DB pension as a
+   * parallel track, since UK income tax is assessed per-individual — a household's
+   * combined tax bill depends on how income and pension drawdown are split between
+   * two people, not just the total. Deliberately NOT duplicated: cash/ISA/LISA/GIA
+   * (treated as shared household savings — most couples pool these anyway, and the
+   * actual research-evidenced ask was about pension drawdown-stage tax imbalance,
+   * not full separate account tracking), spending, and property/mortgage (already
+   * household-level concepts). When coupleMode is false, every partner* field below
+   * is ignored and behaviour is byte-for-byte identical to solo mode.
+   */
+  coupleMode: boolean;
+  partnerSalary0: number; // gross annual salary, today's £
+  partnerPension0: number;
+  partnerPensionContribM: number; // combined employee+employer, monthly, today's £
+  partnerPensionAccess: number;
+  partnerSalSacrifice: boolean;
+  partnerDbPensionOn: boolean;
+  partnerDbPensionAnnual0: number;
+  partnerDbPensionNormalAge: number;
+  partnerDbPensionReductionRate: number;
+
   eqOn: boolean;
   eqShares: number;
   eqPrice: number; // £/share, today's £
@@ -120,6 +142,11 @@ export interface FireAgeYearRow {
   /** DB pension income actually paid this year (0 before pensionAccess, 0 if dbPensionOn
    *  is off, reduced below dbPensionAnnual0 if claimed before dbPensionNormalAge). */
   dbPensionPaid: number;
+  /** 0 whenever coupleMode is off. Tracked separately from `pension` specifically so a
+   *  results view can compare the two partners' pots and flag drawdown-tax imbalance —
+   *  the actual couples-mode ask from research, not just a bigger combined number. */
+  partnerPension: number;
+  partnerDbPensionPaid: number;
   mortgagePaid: number;
   mortgageBal: number;
   growthRate: number; // echo of inputs.growth, for the year-by-year table
@@ -155,6 +182,7 @@ export function simulate(
   let gia = inp.gia0;
   let lisa = inp.lisa0;
   let pension = inp.pension0;
+  let partnerPension = inp.coupleMode ? inp.partnerPension0 : 0;
   let equityHeld = inp.eqOn ? inp.eqShares * inp.eqPrice : 0;
   let mortgageBal = inp.hasProperty ? inp.mortgageBal0 : 0;
   let propertyVal = inp.hasProperty ? inp.propValue0 : 0;
@@ -190,6 +218,7 @@ export function simulate(
       gia *= 1 + growth;
       lisa *= 1 + growth;
       pension *= 1 + pensionGrowth;
+      partnerPension *= 1 + pensionGrowth;
       equityHeld *= 1 + inp.eqGrowth + inp.inflation;
       if (inp.hasProperty) {
         propertyVal *= 1 + inp.propAppreciation + inp.inflation;
@@ -231,6 +260,7 @@ export function simulate(
       equityHeld = 0;
     }
 
+    let partnerPensionContribThisYear = 0;
     if (!retired) {
       pensionContribThisYear = inp.pensionContribM * 12 * inflFactor;
       pension += pensionContribThisYear;
@@ -240,7 +270,22 @@ export function simulate(
         ? Math.max(0, salaryNominal - pensionContribThisYear)
         : salaryNominal;
       const taxResult = calcTax(taxableSalary);
-      const takeHome = taxResult.takeHome;
+      let takeHome = taxResult.takeHome;
+
+      // Partner track: same tax/salary-sacrifice mechanics as the primary person, run
+      // independently since UK income tax is assessed per-individual, not jointly.
+      // Both partners are assumed to stop working at the same retireAge — modelling
+      // two independent retirement ages is out of scope here.
+      if (inp.coupleMode) {
+        partnerPensionContribThisYear = inp.partnerPensionContribM * 12 * inflFactor;
+        partnerPension += partnerPensionContribThisYear;
+
+        const partnerSalaryNominal = inp.partnerSalary0 * inflFactor;
+        const partnerTaxableSalary = inp.partnerSalSacrifice
+          ? Math.max(0, partnerSalaryNominal - partnerPensionContribThisYear)
+          : partnerSalaryNominal;
+        takeHome += calcTax(partnerTaxableSalary).takeHome;
+      }
 
       // Equity: gradual sale of currently-held equity, plus new future vesting.
       if (inp.eqOn) {
@@ -275,7 +320,8 @@ export function simulate(
         isaContribThisYear +
         giaContribThisYear +
         lisaContribThisYear +
-        (inp.salSacrifice ? 0 : pensionContribThisYear);
+        (inp.salSacrifice ? 0 : pensionContribThisYear) +
+        (inp.coupleMode && !inp.partnerSalSacrifice ? partnerPensionContribThisYear : 0);
       const surplus = takeHome - outflow;
       isa += isaContribThisYear;
       gia += giaContribThisYear;
@@ -304,11 +350,20 @@ export function simulate(
       const reductionFactor = Math.max(0, 1 - inp.dbPensionReductionRate * yearsEarly);
       dbPensionAnnual = inp.dbPensionAnnual0 * inflFactor * reductionFactor;
     }
+    let partnerDbPensionAnnual = 0;
+    if (inp.coupleMode && inp.partnerDbPensionOn && retired && age >= inp.partnerPensionAccess) {
+      const partnerYearsEarly = Math.max(0, inp.partnerDbPensionNormalAge - age);
+      const partnerReductionFactor = Math.max(0, 1 - inp.partnerDbPensionReductionRate * partnerYearsEarly);
+      partnerDbPensionAnnual = inp.partnerDbPensionAnnual0 * inflFactor * partnerReductionFactor;
+    }
 
     if (retired) {
-      const portfolioBeforeDraw = cash + isa + gia + lisa + equityHeld + pension;
+      const portfolioBeforeDraw = cash + isa + gia + lisa + equityHeld + pension + partnerPension;
       const spAnnual = inp.spOn && age >= inp.spAge ? inp.spAmount0 * inflFactor : 0;
-      let required = Math.max(0, spendNominal + mortgagePaidThisYear - spAnnual - dbPensionAnnual);
+      let required = Math.max(
+        0,
+        spendNominal + mortgagePaidThisYear - spAnnual - dbPensionAnnual - partnerDbPensionAnnual,
+      );
       if (firstYearDraw === null) {
         firstYearDraw = required;
         firstYearPortfolio = portfolioBeforeDraw;
@@ -349,6 +404,13 @@ export function simulate(
         required -= drawPension;
       }
 
+      let drawPartnerPension = 0;
+      if (inp.coupleMode && required > 0 && age >= inp.partnerPensionAccess && partnerPension > 0) {
+        drawPartnerPension = Math.min(partnerPension, required);
+        partnerPension -= drawPartnerPension;
+        required -= drawPartnerPension;
+      }
+
       if (required > 0.5 && includeIlliquid && propertyVal > 0) {
         const drawProp = Math.min(propertyVal, required);
         propertyVal -= drawProp;
@@ -362,7 +424,7 @@ export function simulate(
       }
     }
 
-    const liquidTotal = cash + isa + gia + lisa + equityHeld + pension;
+    const liquidTotal = cash + isa + gia + lisa + equityHeld + pension + partnerPension;
     const propertyEquity = inp.hasProperty ? Math.max(0, propertyVal - mortgageBal) : 0;
     const total = liquidTotal + propertyEquity;
 
@@ -384,6 +446,8 @@ export function simulate(
       retired,
       spend: spendNominal / df,
       dbPensionPaid: dbPensionAnnual / df,
+      partnerPension: partnerPension / df,
+      partnerDbPensionPaid: partnerDbPensionAnnual / df,
       mortgagePaid: mortgagePaidThisYear / df,
       mortgageBal: mortgageBal / df,
       growthRate: growth,

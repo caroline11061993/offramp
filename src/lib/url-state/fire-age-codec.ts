@@ -51,6 +51,16 @@ export const FIRE_AGE_DEFAULTS: FireAgeFormState = {
   dbPensionAnnual0: 0,
   dbPensionNormalAge: 65,
   dbPensionReductionRate: 0.05,
+  coupleMode: false,
+  partnerSalary0: 0,
+  partnerPension0: 0,
+  partnerPensionContribM: 0,
+  partnerPensionAccess: 57,
+  partnerSalSacrifice: false,
+  partnerDbPensionOn: false,
+  partnerDbPensionAnnual0: 0,
+  partnerDbPensionNormalAge: 65,
+  partnerDbPensionReductionRate: 0.05,
   eqOn: false,
   eqShares: 200,
   eqPrice: 50,
@@ -82,7 +92,7 @@ const bool = z.boolean();
 // Fixed-position tuple, one entry per FireAgeFormState field, in a stable declared
 // order. A leading version tag lets a future field addition be detected safely —
 // old shared links with an outdated shape fall back to defaults rather than crash.
-const CODEC_VERSION = 3;
+const CODEC_VERSION = 4;
 
 const fireAgeTupleSchema = z.tuple([
   num, // currentAge
@@ -115,6 +125,16 @@ const fireAgeTupleSchema = z.tuple([
   num, // dbPensionAnnual0
   num, // dbPensionNormalAge
   num, // dbPensionReductionRate
+  bool, // coupleMode
+  num, // partnerSalary0
+  num, // partnerPension0
+  num, // partnerPensionContribM
+  num, // partnerPensionAccess
+  bool, // partnerSalSacrifice
+  bool, // partnerDbPensionOn
+  num, // partnerDbPensionAnnual0
+  num, // partnerDbPensionNormalAge
+  num, // partnerDbPensionReductionRate
   bool, // eqOn
   num, // eqShares
   num, // eqPrice
@@ -160,6 +180,16 @@ function stateToTuple(state: FireAgeFormState): z.infer<typeof fireAgeTupleSchem
     state.dbPensionAnnual0,
     state.dbPensionNormalAge,
     state.dbPensionReductionRate,
+    state.coupleMode,
+    state.partnerSalary0,
+    state.partnerPension0,
+    state.partnerPensionContribM,
+    state.partnerPensionAccess,
+    state.partnerSalSacrifice,
+    state.partnerDbPensionOn,
+    state.partnerDbPensionAnnual0,
+    state.partnerDbPensionNormalAge,
+    state.partnerDbPensionReductionRate,
     state.eqOn,
     state.eqShares,
     state.eqPrice,
@@ -206,17 +236,27 @@ function tupleToState(t: z.infer<typeof fireAgeTupleSchema>): FireAgeFormState {
     dbPensionAnnual0: t[27],
     dbPensionNormalAge: t[28],
     dbPensionReductionRate: t[29],
-    eqOn: t[30],
-    eqShares: t[31],
-    eqPrice: t[32],
-    eqFutureOn: t[33],
-    eqFutureAnnual0: t[34],
-    eqFutureYears: t[35],
-    eqGrowth: t[36],
-    eqMode: t[37],
-    eqGradualPct: t[38],
-    growth: t[39],
-    pensionGrowth: t[40],
+    coupleMode: t[30],
+    partnerSalary0: t[31],
+    partnerPension0: t[32],
+    partnerPensionContribM: t[33],
+    partnerPensionAccess: t[34],
+    partnerSalSacrifice: t[35],
+    partnerDbPensionOn: t[36],
+    partnerDbPensionAnnual0: t[37],
+    partnerDbPensionNormalAge: t[38],
+    partnerDbPensionReductionRate: t[39],
+    eqOn: t[40],
+    eqShares: t[41],
+    eqPrice: t[42],
+    eqFutureOn: t[43],
+    eqFutureAnnual0: t[44],
+    eqFutureYears: t[45],
+    eqGrowth: t[46],
+    eqMode: t[47],
+    eqGradualPct: t[48],
+    growth: t[49],
+    pensionGrowth: t[50],
   };
 }
 

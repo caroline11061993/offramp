@@ -213,6 +213,91 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
           />
         </div>
 
+        <SubHeading>Planning as a couple?</SubHeading>
+        <Toggle
+          label="Include a partner's income and pensions"
+          checked={state.coupleMode}
+          onChange={(v) => onChange({ coupleMode: v })}
+        />
+        <div className={state.coupleMode ? "mt-3" : "mt-3 opacity-40"}>
+          <p className="mb-3 text-xs text-text-muted">
+            Cash, ISA, LISA and GIA above are treated as shared household savings. Salary and pensions
+            are kept separate here because UK income tax is assessed per person — that&apos;s what
+            determines whether one of you ends up paying higher-rate tax on drawdown while the other has
+            unused headroom. Both of you are assumed to retire at the same age.
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <NumberField
+              label="Partner's gross annual salary"
+              value={state.partnerSalary0}
+              step={1000}
+              onChange={(v) => onChange({ partnerSalary0: v })}
+            />
+            <div>
+              <label className="mb-1.5 flex items-center font-heading text-xs font-medium text-text-muted">
+                Partner salary sacrifice?
+              </label>
+              <select
+                value={state.partnerSalSacrifice ? "1" : "0"}
+                onChange={(e) => onChange({ partnerSalSacrifice: e.target.value === "1" })}
+                className="w-full rounded-lg border border-line-strong bg-bg px-2.5 py-2 font-body text-[13.5px] text-ink"
+              >
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <NumberField
+              label="Partner's pension balance"
+              value={state.partnerPension0}
+              step={1000}
+              onChange={(v) => onChange({ partnerPension0: v })}
+            />
+            <NumberField
+              label="Monthly contribution"
+              value={state.partnerPensionContribM}
+              step={50}
+              onChange={(v) => onChange({ partnerPensionContribM: v })}
+            />
+            <NumberField
+              label="Partner's access age"
+              value={state.partnerPensionAccess}
+              onChange={(v) => onChange({ partnerPensionAccess: v })}
+            />
+          </div>
+
+          <div className="mt-4">
+            <Toggle
+              label="Partner has a DB pension"
+              checked={state.partnerDbPensionOn}
+              onChange={(v) => onChange({ partnerDbPensionOn: v })}
+            />
+            <div
+              className={`mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3 ${state.partnerDbPensionOn ? "" : "opacity-40"}`}
+            >
+              <NumberField
+                label="Annual income at normal age"
+                value={state.partnerDbPensionAnnual0}
+                step={500}
+                onChange={(v) => onChange({ partnerDbPensionAnnual0: v })}
+              />
+              <NumberField
+                label="Scheme's normal pension age"
+                value={state.partnerDbPensionNormalAge}
+                onChange={(v) => onChange({ partnerDbPensionNormalAge: v })}
+              />
+              <NumberField
+                label="Early access reduction"
+                value={toPercentInput(state.partnerDbPensionReductionRate)}
+                step={0.5}
+                onChange={(v) => onChange({ partnerDbPensionReductionRate: fromPercentInput(v) })}
+                hint="%/yr claimed before normal age"
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-end pt-1">
           <button
             type="button"

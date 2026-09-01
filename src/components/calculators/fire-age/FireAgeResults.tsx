@@ -90,6 +90,13 @@ export function FireAgeResults({ state }: { state: FireAgeFormState }) {
           illiquidDepletionAge={illiquidResult?.depletionAge ?? undefined}
         />
 
+        {inputs.coupleMode ? (
+          <SpousalImbalanceNote
+            pension={liquidResult.rows.find((r) => r.age === clampedTestAge)?.pension ?? 0}
+            partnerPension={liquidResult.rows.find((r) => r.age === clampedTestAge)?.partnerPension ?? 0}
+          />
+        ) : null}
+
         <div className="my-3.5 rounded-[var(--radius-token)] border border-line bg-card p-3.5">
           <div className="mb-2 font-data text-[11px] uppercase tracking-wide text-text-muted">
             Net worth over time — age (→) vs. money in today&apos;s pounds (↑)
@@ -139,6 +146,31 @@ export function FireAgeResults({ state }: { state: FireAgeFormState }) {
       <div className="mt-5 flex justify-center">
         <AdSlot slotId="fire-age-results-inline" width={336} height={120} />
       </div>
+    </div>
+  );
+}
+
+/**
+ * Flags a specific, evidenced ask from FIRE-savvy couples: at drawdown, a heavily
+ * lopsided split between two people's pensions can push the larger pot's owner into
+ * higher-rate tax while the smaller pot's owner has unused basic-rate headroom.
+ * Deliberately advisory, not prescriptive — this doesn't model marginal tax rates on
+ * pension withdrawals, it just flags the imbalance so it's worth a proper look.
+ */
+function SpousalImbalanceNote({ pension, partnerPension }: { pension: number; partnerPension: number }) {
+  const larger = Math.max(pension, partnerPension);
+  const smaller = Math.min(pension, partnerPension);
+  if (larger <= 0 || smaller / larger >= 0.6) return null;
+
+  const largerIsYours = pension >= partnerPension;
+  return (
+    <div className="my-3.5 rounded-[10px] border-l-[3px] border-blue bg-card-2 px-3.5 py-3 text-[13px] leading-relaxed text-ink">
+      At this retirement age, {largerIsYours ? "your" : "your partner's"} pension (
+      {fmtGBP(larger)}) is considerably larger than {largerIsYours ? "your partner's" : "yours"} (
+      {fmtGBP(smaller)}). A lopsided split like this can mean the larger pot pushes its owner into
+      higher-rate tax on drawdown while the smaller pot&apos;s owner still has unused basic-rate
+      headroom — worth a proper look at redirecting future contributions toward the smaller pot,
+      rather than something this calculator decides for you.
     </div>
   );
 }
