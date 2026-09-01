@@ -63,7 +63,7 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
         title="Your income & assets"
         subtitle="Salary, savings, pension, and what they'll grow into."
         summary={`${fmtGBP(state.salary0)}/yr salary · ${fmtGBP(
-          state.cash0 + state.isa0 + state.gia0 + state.pension0,
+          state.cash0 + state.isa0 + state.gia0 + state.lisa0 + state.pension0,
         )} saved so far`}
         done={done.has(1)}
         open={openSection === 1}
@@ -111,8 +111,20 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
           step={0.1}
           onChange={(v) => onChange({ growth: fromPercentInput(v) })}
           hint="%/yr, before inflation"
-          info="Entered before inflation is subtracted out — a nominal rate. At 2% inflation, 6.5% works out to roughly 4.5% once inflation is subtracted. One rate applies throughout, working and retired, rather than de-risking automatically at retirement."
+          info="Entered before inflation is subtracted out — a nominal rate. At 2% inflation, 6.5% works out to roughly 4.5% once inflation is subtracted. One rate applies throughout, working and retired, rather than de-risking automatically at retirement. Also used for your LISA below."
         />
+
+        <SubHeading>LISA (Lifetime ISA)</SubHeading>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <NumberField label="LISA balance" value={state.lisa0} step={500} onChange={(v) => onChange({ lisa0: v })} />
+          <NumberField
+            label="Monthly contribution"
+            value={state.lisaContribM}
+            step={50}
+            onChange={(v) => onChange({ lisaContribM: v })}
+            info="The government adds a 25% bonus on top, up to £4,000 of contributions a year (£333/month) — anything you pay in above that still goes in, just without the bonus on the excess. Contributions (and the bonus) stop the year you turn 50. Locked from withdrawal until 60 — this calculator doesn't model using a LISA to buy a first home."
+          />
+        </div>
 
         <SubHeading>Pension / SIPP</SubHeading>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

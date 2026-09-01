@@ -14,6 +14,8 @@ const defaultInputs: FireAgeInputs = {
   bufferMonths: 12,
   isa0: 25000,
   gia0: 8000,
+  lisa0: 0,
+  lisaContribM: 0,
   allocMode: "auto",
   isaAllowance: 20000,
   isaContribM: 0,
@@ -149,5 +151,73 @@ describe("simulate — equity module, all 3 cash-out modes", () => {
     const result = simulate({ ...eqBase, eqMode: "hold" }, 50, false);
     const age50 = result.rows.find((r) => r.age === 50)!;
     expect(age50.equity).toBeCloseTo(4682.308407194522, 4);
+  });
+});
+
+describe("simulate — LISA", () => {
+  const lisaBase: FireAgeInputs = {
+    ...defaultInputs,
+    currentAge: 40,
+    lisa0: 0,
+    growth: 0,
+    inflation: 0,
+  };
+
+  it("earns the 25% government bonus in full when the annual contribution is under the £4,000 cap", () => {
+    // £300/mo * 12 = £3,600/yr, under the cap — full 25% bonus applies: 3600 * 1.25 = 4500.
+    const result = simulate({ ...lisaBase, lisaContribM: 300 }, 65, false);
+    expect(result.rows[0].lisa).toBeCloseTo(4500, 4);
+  });
+
+  it("caps the bonus at the £4,000 annual contribution limit — excess still goes in, just unbonused", () => {
+    // £500/mo * 12 = £6,000/yr, over the cap. Bonus is 4000 * 0.25 = 1000, not 6000 * 0.25.
+    // Full contribution still lands in the account: 6000 + 1000 = 7000.
+    const result = simulate({ ...lisaBase, lisaContribM: 500 }, 65, false);
+    expect(result.rows[0].lisa).toBeCloseTo(7000, 4);
+  });
+
+  it("stops accepting new contributions (and the bonus) from age 50 onward", () => {
+    const result = simulate({ ...lisaBase, currentAge: 48, lisaContribM: 300 }, 65, false);
+    const at = (age: number) => result.rows.find((r) => r.age === age)!.lisa;
+    // Ages 48 and 49: contribution + bonus keeps landing (growth is 0, so purely additive).
+    expect(at(48)).toBeCloseTo(4500, 4); // 3600 + 900
+    expect(at(49)).toBeCloseTo(9000, 4); // + another 3600 + 900
+    // Age 50 onward: no new contribution or bonus — balance is flat (0% growth).
+    expect(at(50)).toBeCloseTo(9000, 4);
+    expect(at(55)).toBeCloseTo(9000, 4);
+  });
+
+  it("is not touched by decumulation before age 60, even once every other liquid pot is exhausted", () => {
+    const tightInputs: FireAgeInputs = {
+      ...lisaBase,
+      currentAge: 55,
+      lisa0: 50000,
+      lisaContribM: 0,
+      cash0: 5000,
+      isa0: 0,
+      gia0: 0,
+      pension0: 0,
+      pensionContribM: 0,
+      hasProperty: false,
+      spOn: false,
+      spend0: 20000,
+    };
+    // Retiring at 55: cash (£5,000) covers only a quarter of one year's spend, and every
+    // other pot is empty — LISA holds £50,000 but can't be touched until 60, so the plan
+    // should not survive despite the LISA balance being more than enough on its own.
+    const lockedResult = simulate(tightInputs, 55, false);
+    expect(lockedResult.survived).toBe(false);
+    expect(lockedResult.rows.find((r) => r.age === 55)!.lisa).toBeCloseTo(50000, 4);
+
+    // The same scenario, but retiring at 60 instead (and only needing to cover a short
+    // 2-year retirement window) — LISA is now unlocked from day one and comfortably
+    // covers the shortfall.
+    const unlockedResult = simulate(
+      { ...tightInputs, currentAge: 60, lifeExpectancy: 61 },
+      60,
+      false,
+    );
+    expect(unlockedResult.survived).toBe(true);
+    expect(unlockedResult.rows.find((r) => r.age === 60)!.lisa).toBeLessThan(50000);
   });
 });

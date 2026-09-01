@@ -29,6 +29,8 @@ export const FIRE_AGE_DEFAULTS: FireAgeFormState = {
   cashReturn: 0.005,
   isa0: 25000,
   gia0: 8000,
+  lisa0: 0,
+  lisaContribM: 0,
   pension0: 40000,
   pensionContribM: 400,
   pensionAccess: 57,
@@ -76,7 +78,7 @@ const bool = z.boolean();
 // Fixed-position tuple, one entry per FireAgeFormState field, in a stable declared
 // order. A leading version tag lets a future field addition be detected safely —
 // old shared links with an outdated shape fall back to defaults rather than crash.
-const CODEC_VERSION = 1;
+const CODEC_VERSION = 2;
 
 const fireAgeTupleSchema = z.tuple([
   num, // currentAge
@@ -87,6 +89,8 @@ const fireAgeTupleSchema = z.tuple([
   num, // cashReturn
   num, // isa0
   num, // gia0
+  num, // lisa0
+  num, // lisaContribM
   num, // pension0
   num, // pensionContribM
   num, // pensionAccess
@@ -126,6 +130,8 @@ function stateToTuple(state: FireAgeFormState): z.infer<typeof fireAgeTupleSchem
     state.cashReturn,
     state.isa0,
     state.gia0,
+    state.lisa0,
+    state.lisaContribM,
     state.pension0,
     state.pensionContribM,
     state.pensionAccess,
@@ -166,33 +172,35 @@ function tupleToState(t: z.infer<typeof fireAgeTupleSchema>): FireAgeFormState {
     cashReturn: t[5],
     isa0: t[6],
     gia0: t[7],
-    pension0: t[8],
-    pensionContribM: t[9],
-    pensionAccess: t[10],
-    salSacrifice: t[11],
-    spend0: t[12],
-    careAge: t[13],
-    careRate: t[14],
-    hasProperty: t[15],
-    propValue0: t[16],
-    mortgageBal0: t[17],
-    mortgageRate: t[18],
-    mortgageTerm: t[19],
-    propAppreciation: t[20],
-    spOn: t[21],
-    spAge: t[22],
-    spAmount0: t[23],
-    eqOn: t[24],
-    eqShares: t[25],
-    eqPrice: t[26],
-    eqFutureOn: t[27],
-    eqFutureAnnual0: t[28],
-    eqFutureYears: t[29],
-    eqGrowth: t[30],
-    eqMode: t[31],
-    eqGradualPct: t[32],
-    growth: t[33],
-    pensionGrowth: t[34],
+    lisa0: t[8],
+    lisaContribM: t[9],
+    pension0: t[10],
+    pensionContribM: t[11],
+    pensionAccess: t[12],
+    salSacrifice: t[13],
+    spend0: t[14],
+    careAge: t[15],
+    careRate: t[16],
+    hasProperty: t[17],
+    propValue0: t[18],
+    mortgageBal0: t[19],
+    mortgageRate: t[20],
+    mortgageTerm: t[21],
+    propAppreciation: t[22],
+    spOn: t[23],
+    spAge: t[24],
+    spAmount0: t[25],
+    eqOn: t[26],
+    eqShares: t[27],
+    eqPrice: t[28],
+    eqFutureOn: t[29],
+    eqFutureAnnual0: t[30],
+    eqFutureYears: t[31],
+    eqGrowth: t[32],
+    eqMode: t[33],
+    eqGradualPct: t[34],
+    growth: t[35],
+    pensionGrowth: t[36],
   };
 }
 

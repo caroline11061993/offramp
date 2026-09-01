@@ -1,5 +1,11 @@
 import { calcTax, marginalTaxOnExtra } from "./tax";
-import { MAX_SAFE_WITHDRAWAL_RATE } from "./constants";
+import {
+  MAX_SAFE_WITHDRAWAL_RATE,
+  LISA_ANNUAL_CONTRIBUTION_CAP,
+  LISA_BONUS_RATE,
+  LISA_CONTRIBUTION_END_AGE,
+  LISA_ACCESS_AGE,
+} from "./constants";
 import type { AllocMode, EquityCashOutMode } from "./types";
 
 export interface FireAgeInputs {
@@ -21,6 +27,16 @@ export interface FireAgeInputs {
 
   isa0: number;
   gia0: number;
+  lisa0: number;
+  /** Monthly, today's £ — always applied regardless of allocMode (like pensionContribM),
+   *  not swept in automatically. Stops entirely from age 50 onward (real LISA rule: you
+   *  can keep contributing, with the 25% bonus, up until the day before you turn 50).
+   *  The 25% government bonus applies to the portion of the annual total at or below
+   *  LISA_ANNUAL_CAP; anything contributed above that cap still goes in, just without
+   *  a bonus on the excess. Locked from withdrawal until LISA_ACCESS_AGE — this engine
+   *  doesn't model the first-home exception, since this is a FIRE/retirement tool, not
+   *  a house-purchase one. */
+  lisaContribM: number;
   /** Dormant — no UI control, always 'auto' in practice. 'manual' would enable
    *  isaContribM/giaContribM below as flat monthly contributions instead of the
    *  automatic buffer -> ISA -> GIA sweep. */
@@ -79,6 +95,7 @@ export interface FireAgeYearRow {
   cash: number;
   isa: number;
   gia: number;
+  lisa: number;
   equity: number;
   pension: number;
   propertyEquity: number;
@@ -119,6 +136,7 @@ export function simulate(
   let cash = inp.cash0;
   let isa = inp.isa0;
   let gia = inp.gia0;
+  let lisa = inp.lisa0;
   let pension = inp.pension0;
   let equityHeld = inp.eqOn ? inp.eqShares * inp.eqPrice : 0;
   let mortgageBal = inp.hasProperty ? inp.mortgageBal0 : 0;
@@ -153,6 +171,7 @@ export function simulate(
       cash *= 1 + inp.cashReturn + inp.inflation;
       isa *= 1 + growth;
       gia *= 1 + growth;
+      lisa *= 1 + growth;
       pension *= 1 + pensionGrowth;
       equityHeld *= 1 + inp.eqGrowth + inp.inflation;
       if (inp.hasProperty) {
@@ -179,6 +198,7 @@ export function simulate(
 
     let isaContribThisYear = 0;
     let giaContribThisYear = 0;
+    let lisaContribThisYear = 0;
     let pensionContribThisYear = 0;
 
     // Equity: transition-to-retirement liquidation happens exactly once.
@@ -224,15 +244,25 @@ export function simulate(
         giaContribThisYear = inp.giaContribM * 12 * inflFactor;
       }
 
+      // LISA contributions are always explicit (like pension), not swept in from
+      // surplus, and stop entirely once you're too old to keep earning the bonus.
+      if (age < LISA_CONTRIBUTION_END_AGE) {
+        lisaContribThisYear = inp.lisaContribM * 12 * inflFactor;
+      }
+      const lisaBonusThisYear =
+        Math.min(lisaContribThisYear, LISA_ANNUAL_CONTRIBUTION_CAP) * LISA_BONUS_RATE;
+
       const outflow =
         spendNominal +
         mortgagePaidThisYear +
         isaContribThisYear +
         giaContribThisYear +
+        lisaContribThisYear +
         (inp.salSacrifice ? 0 : pensionContribThisYear);
       const surplus = takeHome - outflow;
       isa += isaContribThisYear;
       gia += giaContribThisYear;
+      lisa += lisaContribThisYear + lisaBonusThisYear;
       if (surplus > 0) cash += surplus;
     }
 
@@ -252,7 +282,7 @@ export function simulate(
     }
 
     if (retired) {
-      const portfolioBeforeDraw = cash + isa + gia + equityHeld + pension;
+      const portfolioBeforeDraw = cash + isa + gia + lisa + equityHeld + pension;
       const spAnnual = inp.spOn && age >= inp.spAge ? inp.spAmount0 * inflFactor : 0;
       let required = Math.max(0, spendNominal + mortgagePaidThisYear - spAnnual);
       if (firstYearDraw === null) {
@@ -281,6 +311,13 @@ export function simulate(
         required -= drawIsa;
       }
 
+      let drawLisa = 0;
+      if (required > 0 && age >= LISA_ACCESS_AGE && lisa > 0) {
+        drawLisa = Math.min(lisa, required);
+        lisa -= drawLisa;
+        required -= drawLisa;
+      }
+
       let drawPension = 0;
       if (required > 0 && age >= inp.pensionAccess && pension > 0) {
         drawPension = Math.min(pension, required);
@@ -301,7 +338,7 @@ export function simulate(
       }
     }
 
-    const liquidTotal = cash + isa + gia + equityHeld + pension;
+    const liquidTotal = cash + isa + gia + lisa + equityHeld + pension;
     const propertyEquity = inp.hasProperty ? Math.max(0, propertyVal - mortgageBal) : 0;
     const total = liquidTotal + propertyEquity;
 
@@ -314,6 +351,7 @@ export function simulate(
       cash: cash / df,
       isa: isa / df,
       gia: gia / df,
+      lisa: lisa / df,
       equity: equityHeld / df,
       pension: pension / df,
       propertyEquity: propertyEquity / df,
