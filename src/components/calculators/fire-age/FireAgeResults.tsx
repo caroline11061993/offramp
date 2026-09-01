@@ -110,7 +110,7 @@ export function FireAgeResults({ state }: { state: FireAgeFormState }) {
           />
           <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-text-muted">
             <span className="flex items-center gap-1.5">
-              <i className="inline-block h-0.5 w-3.5 bg-accent" /> Liquid assets (cash, ISA, GIA, pension)
+              <i className="inline-block h-0.5 w-3.5 bg-accent" /> Liquid assets (cash, ISA, LISA, GIA, pension)
             </span>
             {hasRealProperty ? (
               <span className="flex items-center gap-1.5">
@@ -194,7 +194,7 @@ function Warning({ children }: { children: React.ReactNode }) {
 const METHODOLOGY_STEPS = [
   {
     title: "Take-home pay.",
-    body: "Your salary runs through actual UK income tax and National Insurance bands to find what's really left to save each year.",
+    body: "Your salary runs through actual UK income tax and National Insurance bands to find what's really left to save each year — and your partner's too, run through the same bands separately, if you've included one.",
   },
   {
     title: "Cash buffer, then surplus.",
@@ -202,23 +202,27 @@ const METHODOLOGY_STEPS = [
   },
   {
     title: "Contributions.",
-    body: "Any monthly amount you've entered for pension is added on top of this, before growth is applied.",
+    body: "Any monthly amount you've entered for pension or LISA is added on top of this, before growth is applied. A LISA also gets the government's 25% bonus added, up to the annual cap.",
   },
   {
     title: "Growth.",
-    body: "Each account compounds at the rate you set — one rate for ISA/GIA/pension throughout, working and retired, and separate fixed rates for cash and property.",
+    body: "Each account compounds at the rate you set — one rate for ISA/LISA/GIA/pension throughout, working and retired, and separate fixed rates for cash and property.",
   },
   {
     title: "Property & mortgage.",
     body: "Tracked entirely separately — appreciating in the background, with the mortgage amortizing month by month. Neither touches your other investments, and property is never sold automatically.",
   },
   {
+    title: "State Pension & DB pension.",
+    body: "If you've included either, they're added as income from their own start age onward — reducing how much needs to come out of your other accounts that year, rather than being pots that get drawn down themselves. A DB pension is reduced for every year it's claimed before your scheme's normal pension age.",
+  },
+  {
     title: "Retirement spending.",
-    body: "Once you retire, each year's spending is drawn in order: cash first, then GIA, then ISA, then your pension — but only once you reach your access age.",
+    body: "Once you retire, each year's remaining spending (after State Pension and any DB pension) is drawn in order: cash first, then GIA, then ISA, then your LISA once you've turned 60, then your pension once you reach your access age.",
   },
   {
     title: "Your FIRE age.",
-    body: "The simulation tests every possible retirement age from now onward and reports the earliest one where this whole process runs all the way to your life expectancy without running out.",
+    body: "The simulation tests every possible retirement age from now onward and reports the earliest one that clears two bars: the whole process runs all the way to your life expectancy without running out, and the first year's withdrawal rate stays at or below a safe 4%.",
   },
 ];
 
@@ -276,8 +280,8 @@ function Narrative({
   if (survived) {
     return (
       <p className="my-3.5 rounded-[10px] border-l-[3px] border-accent-dim bg-card-2 px-3.5 py-3 text-[14px] leading-relaxed text-ink">
-        Spending is fully covered by liquid assets alone — cash, ISA, GIA, pension — projected to reach
-        about <b className="text-accent-dim">{fmtGBP(finalLiquidTotal)}</b> by age {lifeExpectancy}.
+        Spending is fully covered by liquid assets alone — cash, ISA, LISA, GIA, pension — projected to
+        reach about <b className="text-accent-dim">{fmtGBP(finalLiquidTotal)}</b> by age {lifeExpectancy}.
         {hasRealProperty ? (
           <>
             {" "}

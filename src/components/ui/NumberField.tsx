@@ -34,7 +34,7 @@ export function NumberField({ label, value, onChange, step, min, hint, info }: N
   );
 }
 
-function InfoIcon({ text }: { text: string }) {
+export function InfoIcon({ text }: { text: string }) {
   return (
     <details className="group ml-1.5 inline-block">
       <summary className="inline-flex h-[15px] w-[15px] cursor-pointer list-none items-center justify-center rounded-full bg-line-strong text-[10px] font-bold text-text-muted marker:content-none group-open:bg-accent group-open:text-white">

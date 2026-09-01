@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { calcTax } from "@/lib/fire-engine/tax";
 import type { FireAgeFormState } from "@/lib/url-state/fire-age-codec";
 import { fmtGBP, toPercentInput, fromPercentInput } from "@/lib/format";
-import { NumberField } from "@/components/ui/NumberField";
+import { NumberField, InfoIcon } from "@/components/ui/NumberField";
 import { Toggle } from "@/components/ui/Toggle";
 import { Card } from "@/components/ui/Card";
 import { AccordionSection } from "@/components/calculators/shared/AccordionSection";
@@ -115,8 +115,19 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
         />
 
         <SubHeading>LISA (Lifetime ISA)</SubHeading>
+        <p className="mb-3 text-xs text-text-muted">
+          A separate ISA type for retirement or a first home, where the government adds a 25% top-up on
+          your contributions. Don&apos;t have one? Leave both fields at 0 — it&apos;s not something
+          everyone has.
+        </p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <NumberField label="LISA balance" value={state.lisa0} step={500} onChange={(v) => onChange({ lisa0: v })} />
+          <NumberField
+            label="LISA balance"
+            value={state.lisa0}
+            step={500}
+            onChange={(v) => onChange({ lisa0: v })}
+            info="How much is in it today, if you have one."
+          />
           <NumberField
             label="Monthly contribution"
             value={state.lisaContribM}
@@ -152,6 +163,7 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
           <div>
             <label className="mb-1.5 flex items-center font-heading text-xs font-medium text-text-muted">
               Salary sacrifice?
+              <InfoIcon text="A way of paying pension contributions before Income Tax and National Insurance are taken out, rather than after — it usually saves you more than a regular contribution for the same take-home cost. Check your payslip or ask HR if you're not sure which kind you're on. See Cut Your Income Tax with Pension Salary Sacrifice in the Must Read section for the full mechanics." />
             </label>
             <select
               value={state.salSacrifice ? "1" : "0"}
@@ -184,6 +196,13 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
         </div>
 
         <SubHeading>Defined Benefit (final salary / career average) pension</SubHeading>
+        <p className="mb-3 text-xs text-text-muted">
+          Pays a guaranteed income for life based on your salary and years of service, rather than a pot
+          you invest — common in the public sector (NHS, teaching, civil service) and some older private
+          schemes. Not sure if you have one? Check your latest pension statement — if it quotes an annual
+          income rather than a pot value, this is it. If you&apos;re unsure, it&apos;s safe to leave this
+          off; most workplace pensions today are the pot-based kind already covered above.
+        </p>
         <Toggle
           label="I have a DB pension"
           checked={state.dbPensionOn}
@@ -202,6 +221,7 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
             value={state.dbPensionNormalAge}
             onChange={(v) => onChange({ dbPensionNormalAge: v })}
             hint="often 60 or 65"
+            info="The age your scheme itself treats as normal retirement age — check your latest statement if you're not sure. Claiming before this age permanently reduces your income; claiming at or after it pays the full amount."
           />
           <NumberField
             label="Early access reduction"
@@ -232,10 +252,12 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
               value={state.partnerSalary0}
               step={1000}
               onChange={(v) => onChange({ partnerSalary0: v })}
+              info="Converted to real take-home pay using the same UK income tax and National Insurance bands as your own salary, calculated independently."
             />
             <div>
               <label className="mb-1.5 flex items-center font-heading text-xs font-medium text-text-muted">
                 Partner salary sacrifice?
+                <InfoIcon text="Same idea as your own salary sacrifice toggle above — check their payslip or ask their HR if you're not sure which kind of pension contribution they're on." />
               </label>
               <select
                 value={state.partnerSalSacrifice ? "1" : "0"}
@@ -253,17 +275,20 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
               value={state.partnerPension0}
               step={1000}
               onChange={(v) => onChange({ partnerPension0: v })}
+              info="Tracked separately from yours throughout, so the results can flag it if one of you ends up with a much larger pension than the other."
             />
             <NumberField
               label="Monthly contribution"
               value={state.partnerPensionContribM}
               step={50}
               onChange={(v) => onChange({ partnerPensionContribM: v })}
+              info="Your partner + their employer combined."
             />
             <NumberField
               label="Partner's access age"
               value={state.partnerPensionAccess}
               onChange={(v) => onChange({ partnerPensionAccess: v })}
+              info="Currently 55, rising to 57 in 2028 — the earliest UK age they can normally draw a private pension. 57 is a safe default if you're unsure."
             />
           </div>
 
@@ -281,11 +306,13 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
                 value={state.partnerDbPensionAnnual0}
                 step={500}
                 onChange={(v) => onChange({ partnerDbPensionAnnual0: v })}
+                info="Same idea as your own DB pension above — the guaranteed annual income their scheme quotes, not a pot value."
               />
               <NumberField
                 label="Scheme's normal pension age"
                 value={state.partnerDbPensionNormalAge}
                 onChange={(v) => onChange({ partnerDbPensionNormalAge: v })}
+                hint="often 60 or 65"
               />
               <NumberField
                 label="Early access reduction"
@@ -293,6 +320,7 @@ export function FireAgeForm({ state, onChange, onSubmit }: FireAgeFormProps) {
                 step={0.5}
                 onChange={(v) => onChange({ partnerDbPensionReductionRate: fromPercentInput(v) })}
                 hint="%/yr claimed before normal age"
+                info="5% a year is a reasonable estimate if their scheme's exact figure isn't to hand."
               />
             </div>
           </div>
