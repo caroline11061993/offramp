@@ -32,12 +32,12 @@ const faqs: FaqItem[] = [
   {
     question: "Does it account for real UK income tax and National Insurance?",
     answer:
-      "Yes. Take-home pay each working year is computed from your gross salary using real UK income tax and National Insurance bands, including the personal allowance taper above £100,000 — not a flat estimate.",
+      "Yes. Take-home pay each working year is computed from your gross salary using real UK income tax and National Insurance bands, including the personal allowance taper above £100,000 — not a flat estimate. Retirement income is taxed too: pension withdrawals beyond the 25% tax-free element, your State Pension, and any DB pension are all taxed as income (no National Insurance on any of them, matching real UK rules) before they count toward covering your spending. Cash, ISA, and LISA withdrawals are genuinely tax-free and stay untaxed; GIA capital gains tax isn't modelled, since the calculator doesn't track cost basis.",
   },
   {
     question: "What order does it draw money down from in retirement?",
     answer:
-      "Cheapest tax consequence first: cash, then your GIA, then your ISA, then your LISA once you've turned 60, then your pension once you've reached your access age, and finally property — only if you've opted to include it as a last-resort backstop, and only once everything else is exhausted. If you have a State Pension or a defined-benefit pension, those pay in as income from their own start ages and reduce how much needs to be drawn from everything else, rather than sitting in the pot order themselves.",
+      "Cheapest tax consequence first: cash, then your GIA, then your ISA, then your LISA once you've turned 60, then your pension once you've reached your access age, and finally property — only if you've opted to include it as a last-resort backstop, and only once everything else is exhausted. If you have a State Pension or a defined-benefit pension, those pay in as taxed income from their own start ages and the net amount reduces how much needs to be drawn from everything else, rather than sitting in the pot order themselves. Pension withdrawals are grossed up for tax so the take-home amount actually covers what's needed, the same way a real UK pension drawdown works.",
   },
   {
     question: "Does inflation affect the numbers I see?",

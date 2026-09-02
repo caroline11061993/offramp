@@ -161,9 +161,12 @@ export function FireAgeResults({ state }: { state: FireAgeFormState }) {
 /**
  * Flags a specific, evidenced ask from FIRE-savvy couples: at drawdown, a heavily
  * lopsided split between two people's pensions can push the larger pot's owner into
- * higher-rate tax while the smaller pot's owner has unused basic-rate headroom.
- * Deliberately advisory, not prescriptive — this doesn't model marginal tax rates on
- * pension withdrawals, it just flags the imbalance so it's worth a proper look.
+ * higher-rate tax while the smaller pot's owner has unused basic-rate headroom. The
+ * simulation itself now grosses up each pension's withdrawals for income tax
+ * individually (see grossUpTaxableWithdrawal in tax.ts) — this note stays advisory
+ * rather than prescriptive because it doesn't recompute what redirecting future
+ * contributions would actually save, it just flags the imbalance so it's worth a
+ * proper look.
  */
 function SpousalImbalanceNote({ pension, partnerPension }: { pension: number; partnerPension: number }) {
   const larger = Math.max(pension, partnerPension);
@@ -214,11 +217,11 @@ const METHODOLOGY_STEPS = [
   },
   {
     title: "State Pension & DB pension.",
-    body: "If you've included either, they're added as income from their own start age onward — reducing how much needs to come out of your other accounts that year, rather than being pots that get drawn down themselves. A DB pension is reduced for every year it's claimed before your scheme's normal pension age.",
+    body: "If you've included either, they're added as income from their own start age onward — taxed like any other income first, then the net amount reduces how much needs to come out of your other accounts that year, rather than being pots that get drawn down themselves. A DB pension is reduced for every year it's claimed before your scheme's normal pension age.",
   },
   {
     title: "Retirement spending.",
-    body: "Once you retire, each year's remaining spending (after State Pension and any DB pension) is drawn in order: cash first, then GIA, then ISA, then your LISA once you've turned 60, then your pension once you reach your access age.",
+    body: "Once you retire, each year's remaining spending (after State Pension and any DB pension) is drawn in order: cash first, then GIA, then ISA, then your LISA once you've turned 60, then your pension once you reach your access age. Pension withdrawals beyond the 25% tax-free element are taxed as income, same as a real UK pension drawdown — cash, ISA, LISA and GIA withdrawals aren't (GIA capital gains tax isn't modelled here, since the calculator doesn't track cost basis).",
   },
   {
     title: "Your FIRE age.",

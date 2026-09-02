@@ -200,8 +200,9 @@ export function FireNumberResults({ state }: { state: FireNumberInputs }) {
       ) : null}
 
       <div className="mb-4 rounded-[10px] border border-line-strong bg-card-2 p-3 text-[12.5px] text-text-muted">
-        Treats growth and saving as perfectly steady, ignores UK tax — a quick illustration. For the full
-        picture, use FIRE Age.
+        Treats growth and saving as perfectly steady. Pension withdrawals beyond the 25% tax-free element
+        are taxed as UK income, but there&apos;s no National Insurance, fiscal drag, or GIA capital gains
+        tax here — for the full picture, use FIRE Age.
       </div>
 
       <RecommendationModule

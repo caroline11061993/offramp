@@ -44,6 +44,11 @@ const faqs: FaqItem[] = [
     answer:
       "No — property is kept deliberately separate from your target and debt. Switching it on shows what your plan looks like if you sold at retirement, shown alongside the without-property numbers, so you can see exactly how much the house is doing for your plan without committing to selling it.",
   },
+  {
+    question: "Does the verdict account for tax on pension withdrawals?",
+    answer:
+      "Yes, for the real verdict (not the quick target, which is a simpler rule-of-thumb figure). Once you're drawing from your pension, withdrawals beyond the 25% tax-free element are taxed as UK income, and the calculator grosses up the withdrawal so the take-home amount actually covers what's needed. Cash, ISA, and GIA withdrawals aren't taxed here — correct for cash and ISA, a simplification for GIA, which can realistically trigger capital gains tax. This calculator doesn't model a State Pension, DB pension, or National Insurance — for those, use the full FIRE Age Calculator.",
+  },
 ];
 
 export default function FireNumberCalculatorPage() {

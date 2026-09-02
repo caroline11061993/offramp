@@ -55,6 +55,10 @@ Once you're retired, spending each year is drawn from your accounts in a fixed o
 5. **Pension** — but only once you've reached your pension access age
 6. **Property** — only if you've told the explorer to include it as a last-resort backstop, and only once everything else is exhausted
 
+Cash, ISA, LISA, and GIA withdrawals are treated as pound-for-pound spendable — correct for cash, ISA, and LISA (genuinely tax-free UK wrappers), but a known simplification for GIA, where gains above the CGT annual exempt amount are realistically taxable. The calculator doesn't track cost basis (contributions, growth, and withdrawals all net into one GIA balance), so there's no principled way to know what fraction of a withdrawal is gain versus return of capital — modelling CGT properly needs that tracked first, which isn't done here yet.
+
+Pension withdrawals are different: beyond the 25% pension commencement lump sum (tax-free), the rest is taxed as income, stacked on top of whatever else counts as taxable income that year — your State Pension and DB pension, if you've included either. The calculator grosses up each withdrawal so the *net* amount actually covers what's left of that year's spending, rather than draining the pot pound-for-pound. In couple mode, each partner's pension is taxed against their own income separately, matching how UK income tax actually works.
+
 ## Pension locking is a hard rule, not a caveat
 
 Your pension balance counts toward your net worth from day one, but the simulation will not draw a single pound from it before your chosen access age (57 by default — the UK's earliest normal private-pension access age from 2028). If your other accounts run dry before then, the plan is marked as **not surviving**, even if the pension itself is large. This is the single most common reason a plan that "looks fine" on total net worth turns out not to work at the retirement age you had in mind — try retiring a year or two before your access age on the slider and watch how thin the liquid-assets line gets before the pension line ever moves.
@@ -65,11 +69,11 @@ Your property appreciates in the background at its own rate, and your mortgage a
 
 ## State Pension
 
-If you switch it on, your State Pension amount is added as income from your State Pension age onward, directly reducing how much your own portfolio needs to cover that year. It doesn't affect anything before that age.
+If you switch it on, your State Pension amount is added as income from your State Pension age onward. Like any other income, it's taxed first — the UK State Pension is fully taxable, just usually paid gross — and it's the *net*, after-tax amount that reduces how much your own portfolio needs to cover that year. It doesn't affect anything before that age.
 
 ## Defined Benefit (final salary / career average) pension
 
-If you have one, a DB pension is treated the same way as the State Pension: an income stream that directly offsets what needs to be drawn from your other accounts each year, not a pot with a balance that runs down. It isn't paid before your pension access age even if you retire earlier. The one thing DB pensions do that the State Pension doesn't is **early-access reduction** — most schemes permanently cut your income for every year you claim before the scheme's own Normal Pension Age. This calculator models that as a straight-line reduction: your quoted annual income, minus a fixed percentage for each year early, down to whatever floor that leaves. Claim at or after the normal age and you get the full amount; there's no bonus modelled for claiming later than that.
+If you have one, a DB pension is treated the same way as the State Pension: a taxed income stream whose net amount offsets what needs to be drawn from your other accounts each year, not a pot with a balance that runs down. It isn't paid before your pension access age even if you retire earlier. Neither the State Pension nor a DB pension is National Insurance-liable, so only income tax is applied — the same rule real UK retirement income follows. The one thing DB pensions do that the State Pension doesn't is **early-access reduction** — most schemes permanently cut your income for every year you claim before the scheme's own Normal Pension Age. This calculator models that as a straight-line reduction: your quoted annual income, minus a fixed percentage for each year early, down to whatever floor that leaves. Claim at or after the normal age and you get the full amount; there's no bonus modelled for claiming later than that.
 
 ## Planning as a couple
 
