@@ -118,6 +118,14 @@ export function FireAgeResults({ state }: { state: FireAgeFormState }) {
               </span>
             ) : null}
           </div>
+          <div className="mt-2.5 rounded-[8px] border border-line-strong bg-card-2 p-2.5 text-[11.5px] leading-relaxed text-text-muted">
+            Money is still being drawn out every year after the &quot;retired&quot; marker — the year-by-year
+            table below shows each account balance actually falling as it&apos;s spent. The line above can
+            still climb through retirement if your growth rate outpaces what you&apos;re withdrawing —
+            that&apos;s not the simulation skipping withdrawals, it&apos;s growth outrunning them. If you
+            want to see the drawdown itself rather than the net total, that&apos;s what the year-by-year
+            table is for.
+          </div>
         </div>
 
         <div className="my-3.5 rounded-[var(--radius-token)] border border-line bg-card p-3.5">
