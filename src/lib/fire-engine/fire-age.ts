@@ -1,10 +1,11 @@
-import { calcTax, marginalTaxOnExtra } from "./tax";
+import { calcTax, marginalTaxOnExtra, incomeTaxOnly, grossUpTaxableWithdrawal } from "./tax";
 import {
   MAX_SAFE_WITHDRAWAL_RATE,
   LISA_ANNUAL_CONTRIBUTION_CAP,
   LISA_BONUS_RATE,
   LISA_CONTRIBUTION_END_AGE,
   LISA_ACCESS_AGE,
+  PENSION_TAX_FREE_FRACTION,
 } from "./constants";
 import type { AllocMode, EquityCashOutMode } from "./types";
 
@@ -378,10 +379,18 @@ export function simulate(
     if (retired) {
       const portfolioBeforeDraw = cash + isa + gia + lisa + equityHeld + pension + partnerPension;
       const spAnnual = inp.spOn && age >= inp.spAge ? inp.spAmount0 * inflFactor : 0;
-      let required = Math.max(
-        0,
-        spendNominal + mortgagePaidThisYear - spAnnual - dbPensionAnnual - partnerDbPensionAnnual,
-      );
+
+      // DB pension and State Pension are fully taxable income in the UK (neither is
+      // NI-liable) — tax them before netting them off required spend, rather than treating
+      // the gross amount as pound-for-pound spendable. State Pension is attributed to the
+      // primary person's tax position, matching its single (non-partner-specific) input
+      // field; the partner's DB pension is taxed against the partner's own position, since
+      // UK income tax is assessed per individual, not jointly.
+      const primaryOtherTaxableIncome = dbPensionAnnual + spAnnual;
+      const netPrimaryOther = primaryOtherTaxableIncome - incomeTaxOnly(primaryOtherTaxableIncome).tax;
+      const netPartnerDb = partnerDbPensionAnnual - incomeTaxOnly(partnerDbPensionAnnual).tax;
+
+      let required = Math.max(0, spendNominal + mortgagePaidThisYear - netPrimaryOther - netPartnerDb);
       if (firstYearDraw === null) {
         firstYearDraw = required;
         firstYearPortfolio = portfolioBeforeDraw;
@@ -391,6 +400,13 @@ export function simulate(
       cash -= drawCash;
       required -= drawCash;
 
+      // GIA/equity withdrawals are drawn pound-for-pound here — a known simplification.
+      // Realistically GIA gains above the CGT annual exempt amount are taxable, but this
+      // engine doesn't track per-pound cost basis for GIA (contributions, growth, and
+      // withdrawals all net into one balance), so there's no principled way to know what
+      // fraction of a withdrawal is gain vs. return of capital. Modelling CGT here needs
+      // cost-basis tracking added first — that's a separate piece of work, not folded into
+      // this pass so it isn't bolted on as a guess.
       const investPool = gia + equityHeld;
       let drawInvest = 0;
       if (required > 0 && investPool > 0) {
@@ -415,20 +431,39 @@ export function simulate(
         required -= drawLisa;
       }
 
+      // Pension drawdown is taxed as income beyond its 25% tax-free element, stacked on top
+      // of DB pension + State Pension in the tax bands (taken UFPLS-style pro-rata on each
+      // withdrawal — see PENSION_TAX_FREE_FRACTION). Gross up so the pot yields enough net
+      // proceeds to cover what's left of required, rather than draining it pound-for-pound.
       let drawPension = 0;
       if (required > 0 && age >= inp.pensionAccess && pension > 0) {
-        drawPension = Math.min(pension, required);
-        pension -= drawPension;
-        required -= drawPension;
+        const { drawn, net } = grossUpTaxableWithdrawal(
+          pension,
+          required,
+          primaryOtherTaxableIncome,
+          PENSION_TAX_FREE_FRACTION,
+        );
+        drawPension = drawn;
+        pension -= drawn;
+        required -= net;
       }
 
       let drawPartnerPension = 0;
       if (inp.coupleMode && required > 0 && age >= inp.partnerPensionAccess && partnerPension > 0) {
-        drawPartnerPension = Math.min(partnerPension, required);
-        partnerPension -= drawPartnerPension;
-        required -= drawPartnerPension;
+        const { drawn, net } = grossUpTaxableWithdrawal(
+          partnerPension,
+          required,
+          partnerDbPensionAnnual,
+          PENSION_TAX_FREE_FRACTION,
+        );
+        drawPartnerPension = drawn;
+        partnerPension -= drawn;
+        required -= net;
       }
 
+      // Property, last resort — no CGT modelled on the sale (a real main residence usually
+      // qualifies for Private Residence Relief and is CGT-exempt anyway, so this is a much
+      // smaller gap than the GIA one above; still unmodelled if this isn't the main home).
       if (required > 0.5 && includeIlliquid && propertyVal > 0) {
         const drawProp = Math.min(propertyVal, required);
         propertyVal -= drawProp;

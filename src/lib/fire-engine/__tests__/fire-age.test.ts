@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { simulate, findFireAge, type FireAgeInputs } from "../fire-age";
-import { calcTax } from "../tax";
+import { calcTax, incomeTaxOnly, grossUpTaxableWithdrawal } from "../tax";
 
 // Base scenario = the source HTML's own UI defaults, so these tests are checked
 // against the exact same inputs a real user would see on first load.
@@ -109,10 +109,14 @@ describe("simulate — decumulation waterfall + illiquid backstop", () => {
     expect(result.depletionAge).toBe(46);
   });
 
-  it("including property as a last-resort draw extends survival to 68, tapping property", () => {
+  it("including property as a last-resort draw extends survival to 66, tapping property", () => {
+    // 68 before pension drawdown was taxed; now that pension withdrawals beyond the 25%
+    // tax-free element are grossed up for income tax (see grossUpTaxableWithdrawal in
+    // tax.ts), the pension pot empties two years sooner, so the property backstop gets
+    // tapped two years earlier too.
     const result = simulate(defaultInputs, 45, true);
     expect(result.survived).toBe(false);
-    expect(result.depletionAge).toBe(68);
+    expect(result.depletionAge).toBe(66);
     expect(result.propertyTapped).toBe(true);
   });
 });
@@ -127,10 +131,13 @@ describe("simulate — pension access-age locking", () => {
     // Still compounding, no draws, right up to (but not including) access age.
     expect(at(56)).toBeCloseTo(99775.91206741068, 4);
     expect(at(56)).toBeGreaterThan(at(50));
-    // Access age hits — balance drops because draws are now permitted.
-    expect(at(57)).toBeCloseTo(61029.68707178267, 4);
+    // Access age hits — balance drops because draws are now permitted. Lower than the
+    // pre-tax-fix golden (61029.69): 75% of each withdrawal beyond the 25% tax-free element
+    // is now taxed as income (grossUpTaxableWithdrawal in tax.ts), so the pot has to yield a
+    // bigger gross withdrawal to net the same required spend, depleting it faster.
+    expect(at(57)).toBeCloseTo(55747.40039299883, 4);
     expect(at(57)).toBeLessThan(at(56));
-    expect(at(58)).toBeCloseTo(20831.875747312046, 4);
+    expect(at(58)).toBeCloseTo(10034.028350616152, 4);
   });
 });
 
@@ -445,5 +452,74 @@ describe("simulate — tax/NI breakdown row fields", () => {
     expect(row.incomeTax).toBeCloseTo(primaryTax.tax + partnerTax.tax, 2);
     expect(row.nationalInsurance).toBeCloseTo(primaryTax.ni + partnerTax.ni, 2);
     expect(row.takeHomePay).toBeCloseTo(primaryTax.takeHome + partnerTax.takeHome, 2);
+  });
+});
+
+describe("simulate — tax on retirement drawdown", () => {
+  it("pension withdrawals beyond the 25% tax-free element are taxed as income, grossed up to meet spend", () => {
+    const inp: FireAgeInputs = {
+      ...defaultInputs,
+      currentAge: 57,
+      lifeExpectancy: 58,
+      inflation: 0,
+      growth: 0,
+      pensionGrowth: 0,
+      cash0: 0,
+      isa0: 0,
+      gia0: 0,
+      lisa0: 0,
+      pension0: 1_000_000,
+      pensionContribM: 0,
+      pensionAccess: 57,
+      spend0: 20000,
+      hasProperty: false,
+      spOn: false,
+      dbPensionOn: false,
+    };
+    const result = simulate(inp, 57, false);
+    const { drawn } = grossUpTaxableWithdrawal(1_000_000, 20000, 0, 0.25);
+    const row = result.rows.find((r) => r.age === 57)!;
+    // Gross withdrawal is bigger than the £20,000 actually needed — part of it goes to tax
+    // rather than being pound-for-pound spendable, unlike before this fix.
+    expect(drawn).toBeGreaterThan(20000);
+    expect(row.pension).toBeCloseTo(1_000_000 - drawn, 2);
+  });
+
+  it("DB pension is taxed before it offsets required spend, so it covers less than its gross amount would suggest", () => {
+    const base: FireAgeInputs = {
+      ...defaultInputs,
+      currentAge: 55,
+      lifeExpectancy: 56,
+      inflation: 0,
+      growth: 0,
+      pensionGrowth: 0,
+      cash0: 0,
+      isa0: 100000,
+      gia0: 0,
+      lisa0: 0,
+      pension0: 0,
+      pensionContribM: 0,
+      pensionAccess: 55,
+      hasProperty: false,
+      spOn: false,
+      dbPensionOn: true,
+      dbPensionAnnual0: 20000,
+      dbPensionNormalAge: 55,
+      dbPensionReductionRate: 0.05,
+      // £19,000 sits between the DB pension's gross (£20,000) and its net-of-tax amount
+      // (£20,000 - incomeTaxOnly(£20,000).tax = £18,514: £7,430 taxable above the personal
+      // allowance at 20% = £1,486 tax), so whether the model taxes the DB pension changes
+      // whether anything needs to be drawn from the ISA at all.
+      spend0: 19000,
+    };
+    const result = simulate(base, 55, false);
+    const row = result.rows.find((r) => r.age === 55)!;
+    const netDb = 20000 - incomeTaxOnly(20000).tax;
+    expect(netDb).toBeCloseTo(18514, 2);
+    // dbPensionPaid still reports the gross amount the scheme actually pays out.
+    expect(row.dbPensionPaid).toBeCloseTo(20000, 2);
+    // But required spend is only reduced by the net (post-tax) amount, so £486 of spend
+    // (19000 - 18514) still has to come out of the ISA — it would've been £0 pre-fix.
+    expect(row.isa).toBeCloseTo(100000 - 486, 2);
   });
 });

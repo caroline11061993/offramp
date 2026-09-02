@@ -29,3 +29,9 @@ export const LISA_ANNUAL_CONTRIBUTION_CAP = 4000;
 export const LISA_BONUS_RATE = 0.25;
 export const LISA_CONTRIBUTION_END_AGE = 50;
 export const LISA_ACCESS_AGE = 60;
+
+/** Fraction of every DC pension withdrawal that's tax-free (the UK pension commencement
+ *  lump sum), taken UFPLS-style pro-rata on each withdrawal rather than crystallised as a
+ *  single lump sum at retirement — the rest is taxed as income. See fire-age.ts's
+ *  decumulation block for how this stacks with DB pension / State Pension. */
+export const PENSION_TAX_FREE_FRACTION = 0.25;

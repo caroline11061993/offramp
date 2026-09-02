@@ -1,4 +1,5 @@
-import { PENSION_ACCESS_AGE } from "./constants";
+import { PENSION_ACCESS_AGE, PENSION_TAX_FREE_FRACTION } from "./constants";
+import { grossUpTaxableWithdrawal } from "./tax";
 import type { DebtClearMode } from "./types";
 
 export { PENSION_ACCESS_AGE };
@@ -125,14 +126,24 @@ export function projectPath(
       debtMode === "gradual" && yearsSinceRetirement <= debtYears ? annualDebtRepayment : 0;
     let required = spend + debtThisYear;
 
+    // Liquid (cash+ISA+GIA, already merged into one pot before this projection starts —
+    // see calcFireNumber) is drawn pound-for-pound. Correct for the ISA/cash share; a known
+    // simplification for the GIA share, which realistically has CGT above the annual exempt
+    // amount — this engine doesn't track cost basis or split GIA out from the merged pot,
+    // so there's no principled way to tax just that slice. Same gap as fire-age.ts's GIA
+    // drawdown, flagged there for the same reason.
     const fromLiquid = Math.min(liquid, required);
     liquid -= fromLiquid;
     required -= fromLiquid;
 
-    if (required > 0 && a >= pensionAccessAge) {
-      const fromPension = Math.min(pension, required);
-      pension -= fromPension;
-      required -= fromPension;
+    // Pension drawdown beyond its 25% tax-free element is taxed as income — gross up so the
+    // net proceeds cover what's left of required, rather than draining the pot pound-for-pound.
+    // No other taxable income to stack it on (this engine doesn't model DB pension or State
+    // Pension), unlike fire-age.ts's equivalent.
+    if (required > 0 && a >= pensionAccessAge && pension > 0) {
+      const { drawn, net } = grossUpTaxableWithdrawal(pension, required, 0, PENSION_TAX_FREE_FRACTION);
+      pension -= drawn;
+      required -= net;
     }
 
     if (required > 0.5) {
