@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 
 export interface NumberFieldProps {
   label: string;
@@ -14,6 +14,20 @@ export interface NumberFieldProps {
 
 export function NumberField({ label, value, onChange, step, min, hint, info }: NumberFieldProps) {
   const id = useId();
+  // Kept as raw text rather than driven straight off `value` so the field can hold
+  // transient states a number can't represent — empty while clearing it, a trailing
+  // "." while typing a decimal — without forcing a "0" into the input that the next
+  // keystroke then gets appended after.
+  const [text, setText] = useState(() => String(value));
+  // Tracks the last `value` this field rendered against, so an external change (URL
+  // load, preset buttons) can be told apart from the user's own typing during render,
+  // per https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [lastValue, setLastValue] = useState(value);
+  if (value !== lastValue) {
+    setLastValue(value);
+    if (value !== Number(text)) setText(String(value));
+  }
+
   return (
     <div className="mb-3">
       <label htmlFor={id} className="mb-1.5 flex items-center font-heading text-xs font-medium text-text-muted">
@@ -23,10 +37,20 @@ export function NumberField({ label, value, onChange, step, min, hint, info }: N
       <input
         id={id}
         type="number"
-        value={Number.isFinite(value) ? value : ""}
+        value={text}
         step={step}
         min={min}
-        onChange={(e) => onChange(e.target.valueAsNumber || 0)}
+        onChange={(e) => {
+          const raw = e.target.value;
+          setText(raw);
+          const parsed = Number(raw);
+          if (raw.trim() !== "" && Number.isFinite(parsed)) onChange(parsed);
+        }}
+        onBlur={() => {
+          if (text.trim() === "" || !Number.isFinite(Number(text))) {
+            setText(String(value));
+          }
+        }}
         className="w-full rounded-lg border border-line-strong bg-bg px-2.5 py-2 font-data text-[13.5px] text-ink focus:border-accent focus:outline focus:outline-2 focus:outline-accent"
       />
       {hint ? <div className="mt-1 text-[11px] text-text-faint">{hint}</div> : null}

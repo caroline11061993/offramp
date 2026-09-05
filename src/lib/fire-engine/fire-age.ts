@@ -135,6 +135,7 @@ export interface FireAgeYearRow {
   lisa: number;
   equity: number;
   pension: number;
+  propertyValue: number;
   propertyEquity: number;
   liquidTotal: number;
   total: number;
@@ -493,6 +494,7 @@ export function simulate(
       lisa: lisa / df,
       equity: equityHeld / df,
       pension: pension / df,
+      propertyValue: (inp.hasProperty ? propertyVal : 0) / df,
       propertyEquity: propertyEquity / df,
       liquidTotal: liquidTotal / df,
       total: total / df,

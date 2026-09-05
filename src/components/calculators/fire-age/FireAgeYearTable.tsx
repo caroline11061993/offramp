@@ -1,5 +1,5 @@
 import type { FireAgeYearRow } from "@/lib/fire-engine/fire-age";
-import { fmtGBP, fmtPct } from "@/lib/format";
+import { fmtGBP } from "@/lib/format";
 
 export function FireAgeYearTable({ rows }: { rows: FireAgeYearRow[] }) {
   return (
@@ -11,11 +11,10 @@ export function FireAgeYearTable({ rows }: { rows: FireAgeYearRow[] }) {
               "Age",
               "Phase",
               "Liquid assets",
-              "Property equity",
-              "Mortgage remaining",
+              "Property value",
+              "Mortgage / loan / debt",
               "Spending",
-              "Growth",
-              "Total net worth",
+              "Net worth",
             ].map((h) => (
               <th
                 key={h}
@@ -34,10 +33,9 @@ export function FireAgeYearTable({ rows }: { rows: FireAgeYearRow[] }) {
                 {r.retired ? "Retired" : "Working"}
               </td>
               <td className="whitespace-nowrap border-b border-line px-2.5 py-1.5 text-ink">{fmtGBP(r.liquidTotal)}</td>
-              <td className="whitespace-nowrap border-b border-line px-2.5 py-1.5 text-ink">{fmtGBP(r.propertyEquity)}</td>
+              <td className="whitespace-nowrap border-b border-line px-2.5 py-1.5 text-ink">{fmtGBP(r.propertyValue)}</td>
               <td className="whitespace-nowrap border-b border-line px-2.5 py-1.5 text-ink">{fmtGBP(r.mortgageBal)}</td>
               <td className="whitespace-nowrap border-b border-line px-2.5 py-1.5 text-ink">{fmtGBP(r.spend)}</td>
-              <td className="whitespace-nowrap border-b border-line px-2.5 py-1.5 text-ink">{fmtPct(r.growthRate)}</td>
               <td className="whitespace-nowrap border-b border-line px-2.5 py-1.5 text-ink">{fmtGBP(r.total)}</td>
             </tr>
           ))}

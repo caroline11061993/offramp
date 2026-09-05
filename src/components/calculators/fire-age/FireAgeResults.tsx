@@ -6,7 +6,6 @@ import { toFireAgeInputs, type FireAgeFormState } from "@/lib/url-state/fire-age
 import { fmtGBP, fmtPct } from "@/lib/format";
 import { ResultHero } from "@/components/calculators/shared/ResultHero";
 import { FireAgeExplorerChart } from "./FireAgeExplorerChart";
-import { FireAgeTaxChart } from "./FireAgeTaxChart";
 import { FireAgeYearTable } from "./FireAgeYearTable";
 import { RecommendationModule } from "@/components/monetization/RecommendationModule";
 import { AdSlot } from "@/components/monetization/AdSlot";
@@ -128,13 +127,6 @@ export function FireAgeResults({ state }: { state: FireAgeFormState }) {
           </div>
         </div>
 
-        <div className="my-3.5 rounded-[var(--radius-token)] border border-line bg-card p-3.5">
-          <div className="mb-2 font-data text-[11px] uppercase tracking-wide text-text-muted">
-            Where your salary actually goes, working years only
-          </div>
-          <FireAgeTaxChart rows={liquidResult.rows} />
-        </div>
-
         {clampedTestAge < inputs.pensionAccess ? (
           <Warning>
             This retirement age ({clampedTestAge}) is before your pension access age ({inputs.pensionAccess}) —
@@ -146,6 +138,12 @@ export function FireAgeResults({ state }: { state: FireAgeFormState }) {
         <MethodologyDisclosure />
 
         <div className="mt-5 font-data text-[11px] uppercase tracking-wide text-accent-dim">Year-by-year view</div>
+        <div className="mb-2.5 mt-1 text-[11.5px] leading-relaxed text-text-muted">
+          Liquid assets is cash + ISA + LISA + GIA + pension combined, growing each year by your
+          returns and shrinking by whatever&apos;s withdrawn to cover that year&apos;s spending. Property
+          value is shown separately from the mortgage still owed against it, so net worth is liquid
+          assets plus (property value minus mortgage).
+        </div>
         <div className="mt-2.5">
           <FireAgeYearTable rows={liquidResult.rows} />
         </div>

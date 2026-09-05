@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 export interface AccordionSectionProps {
   index: number;
@@ -23,9 +23,26 @@ export function AccordionSection({
   onToggle,
   children,
 }: AccordionSectionProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    // Opening this section can collapse a much taller one above it — without this,
+    // the browser clamps the now out-of-range scroll offset to the new (shorter)
+    // page bottom, which lands on whatever happens to be there (e.g. the FAQ).
+    if (open) {
+      containerRef.current?.scrollIntoView({ behavior: "instant", block: "start" });
+    }
+  }, [open]);
+
   return (
     <div
-      className={`mb-2.5 overflow-hidden rounded-[var(--radius-token)] border bg-card shadow-sm ${
+      ref={containerRef}
+      className={`mb-2.5 scroll-mt-20 overflow-hidden rounded-[var(--radius-token)] border bg-card shadow-sm ${
         open ? "border-accent-dim shadow-md" : "border-line"
       }`}
     >
